@@ -400,7 +400,13 @@ export function CameraCaptureScreen({
             ) : (
               <div
                 className={`grid gap-3 ${
-                  slotsCount === 2 ? "grid-cols-2" : "grid-cols-2 md:grid-cols-4"
+                  slotsCount === 1
+                    ? "grid-cols-1 max-w-sm mx-auto"
+                    : slotsCount === 2
+                    ? "grid-cols-2 max-w-lg mx-auto"
+                    : slotsCount === 3
+                    ? "grid-cols-3 max-w-2xl mx-auto"
+                    : "grid-cols-2 md:grid-cols-4"
                 }`}
               >
                 {capturedPhotos.map((photo, idx) => (

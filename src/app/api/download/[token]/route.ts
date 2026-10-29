@@ -18,6 +18,7 @@ export async function GET(
     const composite = await prisma.photoComposite.findUnique({
       where: { qrDownloadToken: token },
       include: {
+        frameTemplate: true,
         session: {
           include: {
             photoShots: {
@@ -38,6 +39,7 @@ export async function GET(
     return NextResponse.json({
       success: true,
       compositeImage: composite.finalImagePath,
+      layoutType: composite.frameTemplate?.layoutType || "STRIP_2X6",
       shots: composite.session.photoShots.map((s) => ({
         poseIndex: s.poseIndex,
         image: s.filePath,

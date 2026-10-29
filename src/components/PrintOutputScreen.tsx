@@ -89,15 +89,12 @@ export function PrintOutputScreen({
     <>
       {/* Media print style */}
       <div className="hidden print-only">
-        <div className="flex items-center justify-center p-0 m-0 w-full h-full">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={finalImage}
-            alt="Print Output Sheet"
-            className="w-full h-full object-contain"
-            style={{ maxHeight: "100vh", maxWidth: "100vw" }}
-          />
-        </div>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={finalImage}
+          alt="Print Output Sheet"
+          className="w-full h-full object-cover"
+        />
       </div>
 
       {/* Screen View Kiosk */}
