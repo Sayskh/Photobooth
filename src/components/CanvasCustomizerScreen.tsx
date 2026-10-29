@@ -260,7 +260,7 @@ export function CanvasCustomizerScreen({
         <div className="flex flex-1 h-full max-h-[76vh] flex-col items-center justify-center rounded-2xl bg-zinc-200/60 p-4 border border-zinc-300/80 shadow-inner overflow-hidden">
           <div className="w-full flex items-center justify-between text-xs font-mono text-zinc-600 mb-2 px-2">
             <span className="font-bold text-zinc-800 uppercase">
-              Pratinjau Lembar Cetak 4R (2 Strip Fisik)
+              Pratinjau Lembar Cetak 4R Vertikal (2 Strip Fisik)
             </span>
             {selectedStickerId && (
               <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
@@ -432,17 +432,17 @@ export function CanvasCustomizerScreen({
                 <div className="flex gap-2">
                   <button
                     type="button"
-                    onClick={() => handleAddSticker(activeEmoji, 40, 25)}
+                    onClick={() => handleAddSticker(activeEmoji, 25, 40)}
                     className="flex-1 flex min-h-[40px] items-center justify-center gap-1 text-[11px] font-bold text-zinc-800 bg-zinc-100 hover:bg-zinc-200 rounded-lg border border-zinc-200 transition active:scale-95 cursor-pointer"
                   >
-                    <span>Pasang di Strip 1 (Atas)</span>
+                    <span>Pasang di Strip 1 (Kiri)</span>
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleAddSticker(activeEmoji, 40, 75)}
+                    onClick={() => handleAddSticker(activeEmoji, 75, 40)}
                     className="flex-1 flex min-h-[40px] items-center justify-center gap-1 text-[11px] font-bold text-zinc-800 bg-zinc-100 hover:bg-zinc-200 rounded-lg border border-zinc-200 transition active:scale-95 cursor-pointer"
                   >
-                    <span>Pasang di Strip 2 (Bawah)</span>
+                    <span>Pasang di Strip 2 (Kanan)</span>
                   </button>
                 </div>
 

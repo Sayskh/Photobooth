@@ -8,7 +8,7 @@ export interface StickerItem {
 }
 
 export interface RenderOptions {
-  layoutType: string; // STRIP_2X6, GRID_4X6, POLAROID
+  layoutType: string;
   photos: string[]; // Base64 data URLs
   filter: string; // NORMAL, BW, VINTAGE, WARM, COLD
   frameColor: string; // HEX e.g. #FFFFFF
@@ -57,8 +57,8 @@ function createFallbackImage(): HTMLImageElement {
   return img;
 }
 
-// 300 DPI Standard 4R Landscape Dimensions:
-// 6 inch x 4 inch = 1800 x 1200 px (True Landscape Photobooth)
+// 300 DPI Standard 4R Portrait Dimensions:
+// 4 inch x 6 inch = 1200 x 1800 px (Semua Frame Lurus Vertikal)
 export async function renderCompositeCanvas(
   options: RenderOptions
 ): Promise<string> {
@@ -72,8 +72,8 @@ export async function renderCompositeCanvas(
     themeStyle = "CLASSIC",
   } = options;
 
-  const canvasWidth = 1800;
-  const canvasHeight = 1200;
+  const canvasWidth = 1200;
+  const canvasHeight = 1800;
 
   const canvas = document.createElement("canvas");
   canvas.width = canvasWidth;
@@ -81,31 +81,38 @@ export async function renderCompositeCanvas(
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Gagal menginisialisasi canvas.");
 
-  // Target count & loading photos
-  const targetCount = layoutType === "STRIP_2X6" ? 6 : layoutType === "POLAROID" ? 4 : 4;
-  const imageSources = Array.from({ length: targetCount }).map((_, idx) => photos[idx] || "");
+  // Determine needed photo count
+  let targetCount = 4;
+  if (layoutType === "STRIP_2X6_3" || layoutType === "STRIP_2X6") targetCount = 3;
+  else if (layoutType === "STRIP_2X6_4") targetCount = 4;
+  else if (layoutType === "CARD_4X6_6") targetCount = 6;
+  else if (layoutType === "CARD_4X6_4" || layoutType === "GRID_4X6") targetCount = 4;
+  else if (layoutType === "CARD_4X6_TRIPLE") targetCount = 3;
+  else if (layoutType === "CARD_4X6_2" || layoutType === "POLAROID") targetCount = 2;
+  else if (layoutType === "CARD_4X6_1") targetCount = 1;
+
+  const imageSources = Array.from({ length: Math.max(targetCount, photos.length) }).map(
+    (_, idx) => photos[idx] || photos[0] || ""
+  );
   const loadedImages: HTMLImageElement[] = await Promise.all(
     imageSources.map((src) => loadImageSafely(src))
   );
 
-  // ----------------------------------------------------
-  // LAYOUT 1: STRIP_2X6 (2 HORIZONTAL LANDSCAPE STRIPS ON 4R PAPER)
-  // ----------------------------------------------------
-  if (layoutType === "STRIP_2X6") {
-    const stripWidth = 1800;
-    const stripHeight = 600;
+  // ====================================================
+  // 1. STRIP_2X6_3 (2x6" 3 PHOTO - 2 VERTICAL STRIPS)
+  // ====================================================
+  if (layoutType === "STRIP_2X6_3" || layoutType === "STRIP_2X6") {
+    const stripWidth = 600;
+    const stripHeight = 1800;
 
-    // Photos for Strip 1: indices 0, 1, 2
     const strip1Photos = [loadedImages[0], loadedImages[1], loadedImages[2]];
-    // Photos for Strip 2: indices 3, 4, 5
     const strip2Photos = [
       loadedImages[3] || loadedImages[0],
       loadedImages[4] || loadedImages[1],
       loadedImages[5] || loadedImages[2],
     ];
 
-    // Render Strip 1 (Top, y: 0)
-    renderHorizontalStrip(
+    renderVerticalStrip(
       ctx,
       0,
       0,
@@ -116,14 +123,14 @@ export async function renderCompositeCanvas(
       frameColor,
       filter,
       watermarkText,
-      "STRIP 1 • POSE 1-3"
+      "STRIP 1 • 3-CUTS",
+      3
     );
 
-    // Render Strip 2 (Bottom, y: 600)
-    renderHorizontalStrip(
+    renderVerticalStrip(
       ctx,
+      stripWidth,
       0,
-      stripHeight,
       stripWidth,
       stripHeight,
       strip2Photos,
@@ -131,120 +138,232 @@ export async function renderCompositeCanvas(
       frameColor,
       filter,
       watermarkText,
-      "STRIP 2 • POSE 4-6"
+      "STRIP 2 • 3-CUTS",
+      3
     );
 
-    // Middle Horizontal Cut Guideline (Dashed line at y = 600)
-    ctx.save();
-    ctx.strokeStyle = "rgba(161, 161, 170, 0.45)";
-    ctx.lineWidth = 1.5;
-    ctx.setLineDash([10, 8]);
-    ctx.beginPath();
-    ctx.moveTo(0, stripHeight);
-    ctx.lineTo(stripWidth, stripHeight);
-    ctx.stroke();
-
-    // Little scissors mark helper
-    ctx.fillStyle = "rgba(113, 113, 122, 0.6)";
-    ctx.font = "11px monospace";
-    ctx.fillText("✄  POTONG DI SINI", 80, stripHeight - 6);
-    ctx.restore();
+    drawPerforationCutLine(ctx, stripWidth, stripHeight);
   }
 
-  // ----------------------------------------------------
-  // LAYOUT 2: GRID_4X6 (POSTCARD 4R LANDSCAPE: 4 PHOTOS 2x2)
-  // ----------------------------------------------------
-  else if (layoutType === "GRID_4X6") {
-    // 1. Draw Background
-    drawThemeBackground(ctx, 0, 0, canvasWidth, canvasHeight, themeStyle, frameColor);
+  // ====================================================
+  // 2. STRIP_2X6_4 (2x6" 4 PHOTO - KOREAN LIFE4CUTS)
+  // ====================================================
+  else if (layoutType === "STRIP_2X6_4") {
+    const stripWidth = 600;
+    const stripHeight = 1800;
 
-    // 2. Draw 4 Photos in 2x2 Grid (Wide slots)
-    const marginX = 80;
-    const marginY = 50;
-    const gapX = 40;
-    const gapY = 30;
-    const slotWidth = 780;
-    const slotHeight = 480;
-
-    const positions = [
-      { x: marginX, y: marginY },
-      { x: marginX + slotWidth + gapX, y: marginY },
-      { x: marginX, y: marginY + slotHeight + gapY },
-      { x: marginX + slotWidth + gapX, y: marginY + slotHeight + gapY },
+    const strip1Photos = [loadedImages[0], loadedImages[1], loadedImages[2], loadedImages[3]];
+    const strip2Photos = [
+      loadedImages[4] || loadedImages[0],
+      loadedImages[5] || loadedImages[1],
+      loadedImages[6] || loadedImages[2],
+      loadedImages[7] || loadedImages[3],
     ];
 
-    for (let i = 0; i < Math.min(4, loadedImages.length); i++) {
-      const pos = positions[i];
-      drawCroppedImage(ctx, loadedImages[i], pos.x, pos.y, slotWidth, slotHeight, filter);
-    }
-
-    // 3. Postcard Bottom Margin Watermark
-    ctx.save();
-    ctx.fillStyle = isLightColor(frameColor) ? "#27272A" : "#F4F4F5";
-    ctx.font = "bold 20px sans-serif";
-    ctx.fillText(watermarkText, marginX, canvasHeight - 25);
-
-    const dateStr = new Date().toLocaleDateString("id-ID", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
-    ctx.font = "14px monospace";
-    ctx.globalAlpha = 0.6;
-    ctx.textAlign = "right";
-    ctx.fillText(`MEMORIES • ${dateStr}`, canvasWidth - marginX, canvasHeight - 25);
-    ctx.restore();
-  }
-
-  // ----------------------------------------------------
-  // LAYOUT 3: POLAROID (2 POLAROID CARDS SIDE-BY-SIDE ON 4R LANDSCAPE)
-  // ----------------------------------------------------
-  else if (layoutType === "POLAROID") {
-    const cardWidth = 900;
-    const cardHeight = 1200;
-
-    const card1Photos = [loadedImages[0], loadedImages[1]];
-    const card2Photos = [
-      loadedImages[2] || loadedImages[0],
-      loadedImages[3] || loadedImages[1],
-    ];
-
-    renderSinglePolaroidCard(
+    renderVerticalStrip(
       ctx,
       0,
-      cardWidth,
-      cardHeight,
-      card1Photos,
+      0,
+      stripWidth,
+      stripHeight,
+      strip1Photos,
       themeStyle,
       frameColor,
       filter,
       watermarkText,
-      "CARD 1"
+      "STRIP 1 • 4-CUTS",
+      4
     );
 
-    renderSinglePolaroidCard(
+    renderVerticalStrip(
       ctx,
-      cardWidth,
-      cardWidth,
-      cardHeight,
-      card2Photos,
+      stripWidth,
+      0,
+      stripWidth,
+      stripHeight,
+      strip2Photos,
       themeStyle,
       frameColor,
       filter,
       watermarkText,
-      "CARD 2"
+      "STRIP 2 • 4-CUTS",
+      4
     );
 
-    // Vertical Cut Line at x = 900
-    ctx.save();
-    ctx.strokeStyle = "rgba(161, 161, 170, 0.45)";
-    ctx.lineWidth = 1.5;
-    ctx.setLineDash([10, 8]);
-    ctx.beginPath();
-    ctx.moveTo(cardWidth, 0);
-    ctx.lineTo(cardWidth, cardHeight);
-    ctx.stroke();
-    ctx.restore();
+    drawPerforationCutLine(ctx, stripWidth, stripHeight);
+  }
+
+  // ====================================================
+  // 3. CARD_4X6_6 (4x6" 6 PHOTO - 2x3 GRID PORTRAIT)
+  // ====================================================
+  else if (layoutType === "CARD_4X6_6") {
+    drawThemeBackground(ctx, 0, 0, canvasWidth, canvasHeight, themeStyle, frameColor);
+
+    const marginX = 55;
+    const gapX = 25;
+    const slotWidth = 532;
+    const slotHeight = 350;
+    const startY = 60;
+    const gapY = 22;
+
+    const positions = [
+      { x: marginX, y: startY },
+      { x: marginX + slotWidth + gapX, y: startY },
+      { x: marginX, y: startY + slotHeight + gapY },
+      { x: marginX + slotWidth + gapX, y: startY + slotHeight + gapY },
+      { x: marginX, y: startY + (slotHeight + gapY) * 2 },
+      { x: marginX + slotWidth + gapX, y: startY + (slotHeight + gapY) * 2 },
+    ];
+
+    for (let i = 0; i < 6; i++) {
+      const img = loadedImages[i] || loadedImages[0];
+      drawCroppedImage(ctx, img, positions[i].x, positions[i].y, slotWidth, slotHeight, filter);
+    }
+
+    const footerY = startY + 3 * (slotHeight + gapY) + 20;
+    renderPostcardFooter(
+      ctx,
+      marginX,
+      footerY,
+      canvasWidth - marginX * 2,
+      themeStyle,
+      frameColor,
+      watermarkText,
+      "6-SHOTS GRID PHOTO CARD"
+    );
+  }
+
+  // ====================================================
+  // 4. CARD_4X6_4 (4x6" 4 PHOTO - 2x2 GRID PORTRAIT)
+  // ====================================================
+  else if (layoutType === "CARD_4X6_4" || layoutType === "GRID_4X6") {
+    drawThemeBackground(ctx, 0, 0, canvasWidth, canvasHeight, themeStyle, frameColor);
+
+    const marginX = 55;
+    const gapX = 30;
+    const slotWidth = 530;
+    const slotHeight = 440;
+    const startY = 80;
+    const gapY = 30;
+
+    const positions = [
+      { x: marginX, y: startY },
+      { x: marginX + slotWidth + gapX, y: startY },
+      { x: marginX, y: startY + slotHeight + gapY },
+      { x: marginX + slotWidth + gapX, y: startY + slotHeight + gapY },
+    ];
+
+    for (let i = 0; i < 4; i++) {
+      const img = loadedImages[i] || loadedImages[0];
+      drawCroppedImage(ctx, img, positions[i].x, positions[i].y, slotWidth, slotHeight, filter);
+    }
+
+    const footerY = startY + 2 * (slotHeight + gapY) + 30;
+    renderPostcardFooter(
+      ctx,
+      marginX,
+      footerY,
+      canvasWidth - marginX * 2,
+      themeStyle,
+      frameColor,
+      watermarkText,
+      "4-SHOTS MODERN POSTCARD"
+    );
+  }
+
+  // ====================================================
+  // 5. CARD_4X6_TRIPLE (4x6" TRIPLE PHOTO - 3 VERTICAL SLOTS)
+  // ====================================================
+  else if (layoutType === "CARD_4X6_TRIPLE") {
+    drawThemeBackground(ctx, 0, 0, canvasWidth, canvasHeight, themeStyle, frameColor);
+
+    const marginX = 45;
+    const gapX = 20;
+    const slotWidth = Math.round((canvasWidth - marginX * 2 - gapX * 2) / 3); // ~356 px
+    const slotHeight = 880;
+    const startY = 90;
+
+    for (let i = 0; i < 3; i++) {
+      const x = marginX + i * (slotWidth + gapX);
+      const img = loadedImages[i] || loadedImages[0];
+      drawCroppedImage(ctx, img, x, startY, slotWidth, slotHeight, filter);
+    }
+
+    const footerY = startY + slotHeight + 45;
+    renderPostcardFooter(
+      ctx,
+      marginX,
+      footerY,
+      canvasWidth - marginX * 2,
+      themeStyle,
+      frameColor,
+      watermarkText,
+      "TRIPLE PHOTO EDITORIAL"
+    );
+  }
+
+  // ====================================================
+  // 6. CARD_4X6_2 (4x6" 2 PHOTO - DUO POLAROID / STACKED)
+  // ====================================================
+  else if (layoutType === "CARD_4X6_2" || layoutType === "POLAROID") {
+    drawThemeBackground(ctx, 0, 0, canvasWidth, canvasHeight, themeStyle, frameColor);
+
+    const marginX = 60;
+    const slotWidth = canvasWidth - marginX * 2; // 1080 px
+    const slotHeight = 520;
+    const startY = 80;
+    const gapY = 35;
+
+    drawCroppedImage(ctx, loadedImages[0], marginX, startY, slotWidth, slotHeight, filter);
+    drawCroppedImage(
+      ctx,
+      loadedImages[1] || loadedImages[0],
+      marginX,
+      startY + slotHeight + gapY,
+      slotWidth,
+      slotHeight,
+      filter
+    );
+
+    const footerY = startY + 2 * slotHeight + gapY + 40;
+    renderPolaroidChin(
+      ctx,
+      marginX,
+      footerY,
+      slotWidth,
+      canvasHeight - footerY - 40,
+      themeStyle,
+      frameColor,
+      watermarkText,
+      "Together Forever"
+    );
+  }
+
+  // ====================================================
+  // 7. CARD_4X6_1 (4x6" PORTRAIT SINGLE PHOTO - POLAROID JUMBO)
+  // ====================================================
+  else if (layoutType === "CARD_4X6_1") {
+    drawThemeBackground(ctx, 0, 0, canvasWidth, canvasHeight, themeStyle, frameColor);
+
+    const marginX = 60;
+    const slotWidth = canvasWidth - marginX * 2; // 1080 px
+    const slotHeight = 1240;
+    const startY = 70;
+
+    drawCroppedImage(ctx, loadedImages[0], marginX, startY, slotWidth, slotHeight, filter);
+
+    const footerY = startY + slotHeight + 35;
+    renderPolaroidChin(
+      ctx,
+      marginX,
+      footerY,
+      slotWidth,
+      canvasHeight - footerY - 40,
+      themeStyle,
+      frameColor,
+      watermarkText,
+      "Sweet Memories"
+    );
   }
 
   // Draw Custom User Stickers on Top
@@ -269,10 +388,10 @@ export async function renderCompositeCanvas(
 }
 
 // ----------------------------------------------------
-// HORIZONTAL STRIP RENDERER (6" x 2" = 1800 x 600 px)
+// VERTICAL STRIP RENDERER (600 x 1800 px)
 // ----------------------------------------------------
 
-function renderHorizontalStrip(
+function renderVerticalStrip(
   ctx: CanvasRenderingContext2D,
   originX: number,
   originY: number,
@@ -283,48 +402,96 @@ function renderHorizontalStrip(
   frameColor: string,
   filter: string,
   watermarkText: string,
-  stripLabel: string
+  stripLabel: string,
+  photosCount: 3 | 4
 ) {
   ctx.save();
 
   // 1. Draw Background
   drawThemeBackground(ctx, originX, originY, width, height, themeStyle, frameColor);
 
-  // 2. 3 Landscape Photos side-by-side
-  const marginY = 45;
-  const slotHeight = height - marginY * 2; // 510 px
-  const slotWidth = 445; // Aspect ratio ~4:3.5
   const marginX = 45;
-  const gapX = 25;
+  const slotWidth = width - marginX * 2; // 510 px
 
-  for (let i = 0; i < Math.min(3, photos.length); i++) {
-    const x = originX + marginX + i * (slotWidth + gapX);
-    drawCroppedImage(ctx, photos[i], x, originY + marginY, slotWidth, slotHeight, filter);
+  if (photosCount === 3) {
+    const slotHeight = 382;
+    const startY = 50;
+    const gapY = 24;
+
+    for (let i = 0; i < Math.min(3, photos.length); i++) {
+      const y = startY + i * (slotHeight + gapY);
+      drawCroppedImage(ctx, photos[i], originX + marginX, y, slotWidth, slotHeight, filter);
+    }
+
+    const footerY = startY + 3 * (slotHeight + gapY) + 20;
+    const footerHeight = height - footerY - 40;
+    renderStripBrandingFooter(
+      ctx,
+      originX + marginX,
+      footerY,
+      slotWidth,
+      footerHeight,
+      themeStyle,
+      frameColor,
+      watermarkText,
+      stripLabel
+    );
+  } else {
+    // 4 photos
+    const slotHeight = 300;
+    const startY = 40;
+    const gapY = 18;
+
+    for (let i = 0; i < Math.min(4, photos.length); i++) {
+      const y = startY + i * (slotHeight + gapY);
+      drawCroppedImage(ctx, photos[i], originX + marginX, y, slotWidth, slotHeight, filter);
+    }
+
+    const footerY = startY + 4 * (slotHeight + gapY) + 20;
+    const footerHeight = height - footerY - 40;
+    renderStripBrandingFooter(
+      ctx,
+      originX + marginX,
+      footerY,
+      slotWidth,
+      footerHeight,
+      themeStyle,
+      frameColor,
+      watermarkText,
+      stripLabel
+    );
   }
-
-  // 3. Editorial Studio Branding End-Block (Right Column)
-  const brandingX = originX + marginX + 3 * (slotWidth + gapX);
-  const brandingWidth = width - brandingX - marginX; // ~320 px
-  renderStripBrandingColumn(
-    ctx,
-    brandingX,
-    originY + marginY,
-    brandingWidth,
-    slotHeight,
-    themeStyle,
-    frameColor,
-    watermarkText,
-    stripLabel
-  );
 
   ctx.restore();
 }
 
+function drawPerforationCutLine(
+  ctx: CanvasRenderingContext2D,
+  stripWidth: number,
+  stripHeight: number
+) {
+  ctx.save();
+  ctx.strokeStyle = "rgba(161, 161, 170, 0.45)";
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([12, 8]);
+  ctx.beginPath();
+  ctx.moveTo(stripWidth, 0);
+  ctx.lineTo(stripWidth, stripHeight);
+  ctx.stroke();
+
+  ctx.fillStyle = "rgba(113, 113, 122, 0.75)";
+  ctx.font = "bold 12px monospace";
+  ctx.textAlign = "center";
+  ctx.fillText("✄ POTONG DI SINI", stripWidth, 32);
+  ctx.fillText("✄ POTONG DI SINI", stripWidth, stripHeight - 20);
+  ctx.restore();
+}
+
 // ----------------------------------------------------
-// EDITORIAL STRIP BRANDING BLOCK (Right of each horizontal strip)
+// EDITORIAL STRIP BRANDING FOOTER (Bottom of vertical strip)
 // ----------------------------------------------------
 
-function renderStripBrandingColumn(
+function renderStripBrandingFooter(
   ctx: CanvasRenderingContext2D,
   x: number,
   y: number,
@@ -345,18 +512,18 @@ function renderStripBrandingColumn(
     const maroon = "#881337";
     ctx.strokeStyle = maroon;
     ctx.lineWidth = 2;
-    ctx.strokeRect(x + 10, y + 5, w - 20, h - 10);
+    ctx.strokeRect(x, y + 10, w, h - 20);
 
     ctx.fillStyle = maroon;
     ctx.textAlign = "center";
-    ctx.font = "900 22px serif";
-    ctx.fillText("ADMIT ONE", centerX, y + 60);
+    ctx.font = "900 24px serif";
+    ctx.fillText("ADMIT ONE", centerX, y + 55);
 
-    ctx.font = "italic 13px serif";
-    ctx.fillText("CINEMA PASS", centerX, y + 85);
+    ctx.font = "italic 14px serif";
+    ctx.fillText("CINEMA PASS", centerX, y + 80);
 
     ctx.font = "bold 13px monospace";
-    ctx.fillText(stripLabel, centerX, y + 140);
+    ctx.fillText(stripLabel, centerX, y + 120);
 
     const dateStr = new Date().toLocaleDateString("en-US", {
       month: "short",
@@ -364,159 +531,218 @@ function renderStripBrandingColumn(
       year: "numeric",
     }).toUpperCase();
     ctx.font = "12px monospace";
-    ctx.fillText(dateStr, centerX, y + 170);
-    ctx.fillText("SEAT A-04", centerX, y + 195);
+    ctx.fillText(dateStr, centerX, y + 148);
+    ctx.fillText("SEAT A-04 • ROW 1", centerX, y + 170);
 
-    // Barcode
-    drawVerticalBarcode(ctx, centerX - 55, y + 240, 110, 200, maroon);
+    drawBarcode(ctx, x + 35, y + 205, w - 70, 55, maroon);
+
+    ctx.font = "10px monospace";
+    ctx.fillText(watermarkText, centerX, y + h - 30);
   } else if (themeStyle === "Y2K_CHECKER") {
     const blue = "#1E3A8A";
     ctx.fillStyle = blue;
     ctx.textAlign = "center";
 
     ctx.font = "900 26px monospace";
-    ctx.fillText("RADICAL", centerX, y + 70);
+    ctx.fillText("RADICAL", centerX, y + 50);
 
-    ctx.font = "bold 14px monospace";
-    ctx.fillText("MOMENT", centerX, y + 100);
+    ctx.font = "bold 15px monospace";
+    ctx.fillText("MOMENT", centerX, y + 78);
 
-    // Small checker accent box
     ctx.fillStyle = "#FBBF24";
-    ctx.fillRect(x + 20, y + 140, w - 40, 60);
+    ctx.fillRect(x + 20, y + 105, w - 40, 42);
     ctx.fillStyle = blue;
     ctx.font = "bold 14px monospace";
-    ctx.fillText(stripLabel, centerX, y + 175);
+    ctx.fillText(stripLabel, centerX, y + 132);
 
     ctx.font = "12px monospace";
-    ctx.fillText("KIOSKSNAP • 2026", centerX, y + 260);
-    ctx.fillText("STUDIO SHOT", centerX, y + 290);
+    ctx.fillText("KIOSKSNAP • 2026", centerX, y + 180);
+    ctx.fillText("AUTHENTIC STUDIO SHOT", centerX, y + 202);
 
-    drawBarcode(ctx, x + 25, y + 360, w - 50, 70, blue);
+    drawBarcode(ctx, x + 30, y + 230, w - 60, 58, blue);
+
+    ctx.font = "10px monospace";
+    ctx.fillText(watermarkText, centerX, y + h - 30);
   } else if (themeStyle === "GREEN_CAFE") {
-    // Cafe Guest Check Badge
     ctx.fillStyle = "#FCE7F3";
-    ctx.fillRect(x + 15, y + 20, w - 30, 70);
+    ctx.fillRect(x, y + 10, w, 60);
     ctx.strokeStyle = "#DB2777";
     ctx.lineWidth = 2;
-    ctx.strokeRect(x + 15, y + 20, w - 30, 70);
+    ctx.strokeRect(x, y + 10, w, 60);
 
     ctx.fillStyle = "#9D174D";
     ctx.font = "bold 16px serif";
     ctx.textAlign = "center";
-    ctx.fillText("CAFE MEMORIES", centerX, y + 50);
+    ctx.fillText("CAFE MEMORIES", centerX, y + 36);
     ctx.font = "12px monospace";
-    ctx.fillText("GUEST CHECK", centerX, y + 72);
+    ctx.fillText("GUEST CHECK", centerX, y + 55);
 
     ctx.fillStyle = "#FEF08A";
-    ctx.fillRect(x + 15, y + 120, w - 30, 110);
+    ctx.fillRect(x, y + 88, w, 75);
     ctx.fillStyle = "#854D0E";
-    ctx.font = "bold 13px sans-serif";
-    ctx.fillText("SPECIAL DAY", centerX, y + 155);
+    ctx.font = "bold 14px sans-serif";
+    ctx.fillText("SPECIAL DAY", centerX, y + 118);
     ctx.font = "12px monospace";
-    ctx.fillText(stripLabel, centerX, y + 185);
-    ctx.fillText(new Date().toLocaleDateString("id-ID"), centerX, y + 210);
+    ctx.fillText(stripLabel, centerX, y + 138);
+    ctx.fillText(new Date().toLocaleDateString("id-ID"), centerX, y + 154);
 
-    // Bottom note
+    drawBarcode(ctx, x + 30, y + 185, w - 60, 55, "#FFFFFF");
+
     ctx.fillStyle = "#FFFFFF";
-    ctx.font = "12px monospace";
-    ctx.fillText(watermarkText, centerX, y + 430);
+    ctx.font = "11px monospace";
+    ctx.fillText(watermarkText, centerX, y + h - 30);
   } else if (themeStyle === "POP_YELLOW") {
     ctx.fillStyle = "#18181B";
     ctx.textAlign = "center";
-    ctx.font = "900 24px sans-serif";
-    ctx.fillText("HAPPY DAY", centerX, y + 70);
+    ctx.font = "900 26px sans-serif";
+    ctx.fillText("HAPPY DAY", centerX, y + 50);
 
-    ctx.font = "bold 13px monospace";
-    ctx.fillText("★ PHOTO EVENT ★", centerX, y + 105);
+    ctx.font = "bold 14px monospace";
+    ctx.fillText("★ PHOTO EVENT ★", centerX, y + 82);
 
     ctx.fillStyle = "#18181B";
-    ctx.fillRect(x + 15, y + 150, w - 30, 80);
+    ctx.fillRect(x + 20, y + 110, w - 40, 48);
     ctx.fillStyle = "#FACC15";
     ctx.font = "bold 15px monospace";
-    ctx.fillText(stripLabel, centerX, y + 195);
+    ctx.fillText(stripLabel, centerX, y + 140);
+
+    drawBarcode(ctx, x + 30, y + 185, w - 60, 55, "#18181B");
 
     ctx.fillStyle = "#18181B";
-    ctx.font = "12px monospace";
-    ctx.fillText(watermarkText, centerX, y + 360);
-    ctx.fillText(new Date().toLocaleDateString("id-ID"), centerX, y + 390);
+    ctx.font = "11px monospace";
+    ctx.fillText(watermarkText, centerX, y + h - 30);
   } else {
     // CLASSIC STUDIO MINIMAL
     ctx.fillStyle = textColor;
     ctx.textAlign = "center";
 
     ctx.font = "bold 22px sans-serif";
-    ctx.fillText(watermarkText, centerX, y + 80);
+    ctx.fillText(watermarkText, centerX, y + 55);
 
     ctx.font = "13px monospace";
     ctx.globalAlpha = 0.7;
-    ctx.fillText(stripLabel, centerX, y + 115);
+    ctx.fillText(stripLabel, centerX, y + 88);
 
     const dateStr = new Date().toLocaleDateString("id-ID", {
       day: "numeric",
       month: "short",
       year: "numeric",
     });
-    ctx.fillText(dateStr, centerX, y + 145);
+    ctx.fillText(dateStr, centerX, y + 115);
 
-    // Minimal vertical bar
-    ctx.fillRect(centerX - 40, y + 180, 80, 2);
+    ctx.fillRect(centerX - 50, y + 138, 100, 2);
 
     ctx.font = "11px monospace";
-    ctx.fillText("AUTHENTIC FILM", centerX, y + 220);
-    ctx.fillText("300 DPI • STUDIO", centerX, y + 245);
+    ctx.fillText("AUTHENTIC FILM", centerX, y + 170);
+    ctx.fillText("300 DPI • STUDIO", centerX, y + 192);
 
-    // Minimal barcode
-    drawBarcode(ctx, x + 35, y + 360, w - 70, 65, textColor);
+    drawBarcode(ctx, x + 35, y + 215, w - 70, 58, textColor);
   }
 
   ctx.restore();
 }
 
 // ----------------------------------------------------
-// POLAROID RENDERER
+// POSTCARD & POLAROID FOOTER HELPERS
 // ----------------------------------------------------
 
-function renderSinglePolaroidCard(
+function renderPostcardFooter(
   ctx: CanvasRenderingContext2D,
-  offsetX: number,
-  width: number,
-  height: number,
-  photos: HTMLImageElement[],
+  x: number,
+  y: number,
+  w: number,
   themeStyle: string,
   frameColor: string,
-  filter: string,
   watermarkText: string,
-  cardLabel: string
+  collectionTitle: string
 ) {
+  const isLight = isLightColor(themeStyle === "CLASSIC" ? frameColor : getThemeBaseColor(themeStyle));
+  const textColor = isLight ? "#18181B" : "#F4F4F5";
+
   ctx.save();
+  ctx.fillStyle = textColor;
+  ctx.textAlign = "left";
 
-  // Background
-  drawThemeBackground(ctx, offsetX, 0, width, height, themeStyle, frameColor);
+  // Divider Line
+  ctx.strokeStyle = isLight ? "rgba(24, 24, 27, 0.15)" : "rgba(244, 244, 245, 0.25)";
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(x + w, y);
+  ctx.stroke();
 
-  // 2 Landscape Photos stacked
-  const marginX = 65;
-  const slotWidth = width - marginX * 2; // 770 px
-  const slotHeight = 440;
-  const startY = 60;
-  const gapY = 40;
+  // Left Notes
+  ctx.font = "bold 24px sans-serif";
+  ctx.fillText(watermarkText, x, y + 45);
 
-  for (let i = 0; i < Math.min(2, photos.length); i++) {
-    const y = startY + i * (slotHeight + gapY);
-    drawCroppedImage(ctx, photos[i], offsetX + marginX, y, slotWidth, slotHeight, filter);
-  }
-
-  // Polaroid Bottom Chin (Handwritten label)
-  ctx.save();
-  ctx.fillStyle = isLightColor(frameColor) ? "#27272A" : "#F4F4F5";
-  ctx.font = "italic 32px serif";
-  ctx.textAlign = "center";
-  ctx.fillText("Sweet Memories", offsetX + width / 2, height - 100);
-
+  const dateStr = new Date().toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
   ctx.font = "14px monospace";
-  ctx.globalAlpha = 0.6;
-  ctx.fillText(`${cardLabel} • ${watermarkText} • ${new Date().toLocaleDateString("id-ID")}`, offsetX + width / 2, height - 60);
-  ctx.restore();
+  ctx.globalAlpha = 0.7;
+  ctx.fillText(`${collectionTitle} • ${dateStr}`, x, y + 75);
+  ctx.fillText("KIOSKSNAP SELF-SERVICE PHOTO STUDIO", x, y + 98);
 
+  // Note lines
+  ctx.strokeStyle = isLight ? "rgba(24, 24, 27, 0.1)" : "rgba(244, 244, 245, 0.15)";
+  ctx.setLineDash([4, 4]);
+  for (let line = 0; line < 4; line++) {
+    const lineY = y + 140 + line * 32;
+    ctx.beginPath();
+    ctx.moveTo(x, lineY);
+    ctx.lineTo(x + 520, lineY);
+    ctx.stroke();
+  }
+  ctx.setLineDash([]);
+
+  // Right Stamp Box & Barcode
+  const stampX = x + w - 140;
+  const stampY = y + 30;
+  ctx.strokeRect(stampX, stampY, 140, 160);
+  ctx.font = "bold 10px monospace";
+  ctx.textAlign = "center";
+  ctx.fillText("POSTAGE", stampX + 70, stampY + 40);
+  ctx.fillText("STAMP", stampX + 70, stampY + 60);
+  ctx.fillText("300 DPI", stampX + 70, stampY + 130);
+
+  drawBarcode(ctx, x + w - 460, y + 220, 460, 60, textColor);
+  ctx.restore();
+}
+
+function renderPolaroidChin(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  themeStyle: string,
+  frameColor: string,
+  watermarkText: string,
+  scriptTitle: string
+) {
+  const isLight = isLightColor(themeStyle === "CLASSIC" ? frameColor : getThemeBaseColor(themeStyle));
+  const textColor = isLight ? "#18181B" : "#F4F4F5";
+
+  ctx.save();
+  ctx.fillStyle = textColor;
+  ctx.textAlign = "center";
+
+  const centerX = x + w / 2;
+  ctx.font = "italic 44px serif";
+  ctx.fillText(scriptTitle, centerX, y + 70);
+
+  const dateStr = new Date().toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+  ctx.font = "14px monospace";
+  ctx.globalAlpha = 0.7;
+  ctx.fillText(`${watermarkText} • ${dateStr}`, centerX, y + 115);
+
+  drawBarcode(ctx, centerX - 180, y + 150, 360, 60, textColor);
   ctx.restore();
 }
 
@@ -686,30 +912,6 @@ function drawBarcode(
   ctx.restore();
 }
 
-function drawVerticalBarcode(
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-  color: string
-) {
-  ctx.save();
-  ctx.fillStyle = color;
-  const barCount = 28;
-  const unit = h / barCount;
-
-  for (let i = 0; i < barCount; i++) {
-    const isThick = i % 3 === 0 || i % 6 === 0;
-    const isSkip = i % 7 === 0;
-    if (!isSkip) {
-      const barH = isThick ? unit * 1.4 : unit * 0.7;
-      ctx.fillRect(x, y + i * unit, w, barH);
-    }
-  }
-  ctx.restore();
-}
-
 function isLightColor(hex: string): boolean {
   if (!hex || !hex.startsWith("#")) return true;
   const r = parseInt(hex.slice(1, 3), 16) || 255;
@@ -717,4 +919,55 @@ function isLightColor(hex: string): boolean {
   const b = parseInt(hex.slice(5, 7), 16) || 255;
   const brightness = (r * 299 + g * 587 + b * 114) / 1000;
   return brightness > 140;
+}
+
+// Helper: Slice composite sheet into standalone individual strips for social media / separate download
+export async function exportStripsFromComposite(
+  compositeDataUrl: string,
+  layoutType: string
+): Promise<{ strip1: string; strip2: string } | null> {
+  const isStripLayout =
+    layoutType.startsWith("STRIP_") || layoutType === "STRIP_2X6";
+
+  if (!isStripLayout) {
+    return null;
+  }
+
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const stripW = Math.round(img.width / 2); // 600 px
+        const stripH = img.height; // 1800 px
+
+        // Strip 1 (Left Half)
+        const canvas1 = document.createElement("canvas");
+        canvas1.width = stripW;
+        canvas1.height = stripH;
+        const ctx1 = canvas1.getContext("2d");
+        if (ctx1) {
+          ctx1.drawImage(img, 0, 0, stripW, stripH, 0, 0, stripW, stripH);
+        }
+
+        // Strip 2 (Right Half)
+        const canvas2 = document.createElement("canvas");
+        canvas2.width = stripW;
+        canvas2.height = stripH;
+        const ctx2 = canvas2.getContext("2d");
+        if (ctx2) {
+          ctx2.drawImage(img, stripW, 0, stripW, stripH, 0, 0, stripW, stripH);
+        }
+
+        resolve({
+          strip1: canvas1.toDataURL("image/png", 0.95),
+          strip2: canvas2.toDataURL("image/png", 0.95),
+        });
+      } catch (err) {
+        console.error("Failed to slice strips:", err);
+        resolve(null);
+      }
+    };
+    img.onerror = () => resolve(null);
+    img.src = compositeDataUrl;
+  });
 }

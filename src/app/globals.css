@@ -12,7 +12,6 @@ body {
   user-select: none;
   -webkit-user-select: none;
   touch-action: manipulation;
-  overflow: hidden;
 }
 
 /* Kiosk mode prevent text selection & context menu */
@@ -20,21 +19,37 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Print Styles */
+/* Print Styles - True 4R Portrait (4x6 inch / 1200x1800 px @ 300 DPI) */
 @media print {
   @page {
     margin: 0;
-    size: landscape;
+    size: 4in 6in portrait;
   }
-  body {
+  html, body {
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
     background: #ffffff !important;
     color: #000000 !important;
-    overflow: visible !important;
   }
   .no-print {
     display: none !important;
   }
   .print-only {
     display: block !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .print-only img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
   }
 }

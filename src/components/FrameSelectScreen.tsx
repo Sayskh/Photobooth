@@ -8,7 +8,18 @@ export interface TemplateChoice {
   id: string;
   name: string;
   shortName: string;
-  layoutType: "STRIP_2X6" | "GRID_4X6" | "POLAROID";
+  category: "STRIP" | "CARD";
+  layoutType:
+    | "STRIP_2X6_3"
+    | "STRIP_2X6_4"
+    | "CARD_4X6_6"
+    | "CARD_4X6_4"
+    | "CARD_4X6_TRIPLE"
+    | "CARD_4X6_2"
+    | "CARD_4X6_1"
+    | "STRIP_2X6"
+    | "GRID_4X6"
+    | "POLAROID";
   slotsCount: number;
   posesPerStrip: number;
   printCopies: number;
@@ -81,39 +92,94 @@ export const SOLID_PALETTE = [
 export const TEMPLATES: TemplateChoice[] = [
   {
     id: "template-strip-3",
-    name: "Twin Film Strip (4R Landscape)",
-    shortName: "2 Strip Film (Landscape)",
-    layoutType: "STRIP_2X6",
-    slotsCount: 6, // 3 poses for Strip 1 + 3 poses for Strip 2
+    name: "2×6\" 3 Photo (Twin Strip)",
+    shortName: "2×6\" 3 Photo",
+    category: "STRIP",
+    layoutType: "STRIP_2X6_3",
+    slotsCount: 3,
     posesPerStrip: 3,
     printCopies: 2,
-    badge: "Favorit • 2 Strip 6×2\"",
-    headline: "6 Pose Landscape (3 Pose Berbeda Tiap Strip)",
-    subHeadline: "Lembar 4R Landscape terbelah jadi 2 strip film sinematik dengan pose berbeda",
+    badge: "2×6\" 3 Photo • Favorit",
+    headline: "3 Pose Vertikal (2 Strip Kembar 2×6\")",
+    subHeadline: "Format strip klasik 3 foto bertingkat, dicetak 2 lembar kembar pada kertas 4R",
+  },
+  {
+    id: "template-strip-4",
+    name: "2×6\" 4 Photo (Life4Cuts)",
+    shortName: "2×6\" 4 Photo",
+    category: "STRIP",
+    layoutType: "STRIP_2X6_4",
+    slotsCount: 4,
+    posesPerStrip: 4,
+    printCopies: 2,
+    badge: "2×6\" 4 Photo • Korean 4-Cuts",
+    headline: "4 Pose Vertikal (2 Strip Kembar 2×6\")",
+    subHeadline: "Format strip populer Korea dengan 4 foto bertingkat sinematik",
+  },
+  {
+    id: "template-card-6",
+    name: "4×6\" 6 Photo (Grid 2×3)",
+    shortName: "4×6\" 6 Photo",
+    category: "CARD",
+    layoutType: "CARD_4X6_6",
+    slotsCount: 6,
+    posesPerStrip: 6,
+    printCopies: 1,
+    badge: "4×6\" 6 Photo • Kolase",
+    headline: "6 Pose Grid (2 Kolom × 3 Baris)",
+    subHeadline: "1 lembar kartu 4R penuh memuat 6 pose seru bersama teman kelompok",
   },
   {
     id: "template-grid-4",
-    name: "Modern Card (4R Postcard)",
-    shortName: "Postcard 4R",
-    layoutType: "GRID_4X6",
+    name: "4×6\" 4 Photo (Grid 2×2)",
+    shortName: "4×6\" 4 Photo",
+    category: "CARD",
+    layoutType: "CARD_4X6_4",
     slotsCount: 4,
     posesPerStrip: 4,
     printCopies: 1,
-    badge: "1 Kartu Lebar",
-    headline: "4 Pose Lebar (Grid 2×2 Landscape)",
-    subHeadline: "1 lembar kartu pos tebal 15×10 cm, foto lebar tanpa terpotong",
+    badge: "4×6\" 4 Photo • Postcard",
+    headline: "4 Pose Grid (Kartu Pos 4R Vertikal)",
+    subHeadline: "1 lembar kartu pos tebal 10×15 cm dengan 4 foto lebar proporsional",
+  },
+  {
+    id: "template-card-triple",
+    name: "4×6\" Triple Photo (3 Kolom)",
+    shortName: "4×6\" Triple",
+    category: "CARD",
+    layoutType: "CARD_4X6_TRIPLE",
+    slotsCount: 3,
+    posesPerStrip: 3,
+    printCopies: 1,
+    badge: "4×6\" Triple Photo",
+    headline: "3 Pose Berdampingan (Kartu 4R)",
+    subHeadline: "3 foto tegak berjajar sejajar dengan ruang branding artistik di bawah",
   },
   {
     id: "template-duo-2",
-    name: "Twin Polaroid (Landscape)",
-    shortName: "2 Polaroid Kembar",
-    layoutType: "POLAROID",
-    slotsCount: 4, // 2 poses for Card 1 + 2 poses for Card 2
+    name: "4×6\" 2 Photo (Duo)",
+    shortName: "4×6\" 2 Photo",
+    category: "CARD",
+    layoutType: "CARD_4X6_2",
+    slotsCount: 2,
     posesPerStrip: 2,
-    printCopies: 2,
-    badge: "2 Lembar Kartu",
-    headline: "4 Pose Sinematik (2 Pose Tiap Kartu)",
-    subHeadline: "2 kartu foto lebar dengan margin bawah luas untuk dekorasi stiker",
+    printCopies: 1,
+    badge: "4×6\" 2 Photo • Duo",
+    headline: "2 Pose Sinematik (Kartu 4R)",
+    subHeadline: "2 foto berukuran besar untuk pasangan atau sahabat dekat",
+  },
+  {
+    id: "template-card-single",
+    name: "4×6\" Portrait Single Photo",
+    shortName: "4×6\" Single",
+    category: "CARD",
+    layoutType: "CARD_4X6_1",
+    slotsCount: 1,
+    posesPerStrip: 1,
+    printCopies: 1,
+    badge: "4×6\" Single Photo • Polaroid",
+    headline: "1 Pose Utama (Polaroid Jumbo 4R)",
+    subHeadline: "1 foto tunggal beresolusi tinggi dengan bingkai tebal bergaya polaroid",
   },
 ];
 
@@ -125,8 +191,97 @@ interface FrameSelectScreenProps {
   initialFrameColor?: string;
 }
 
-// Clean editorial landscape silhouette card (Zero emoji, Zero AI-slop)
-function EditorialLandscapeCard({
+// Mini Silhouette preview corresponding to user reference image
+function TemplateSilhouetteIcon({ layoutType }: { layoutType: string }) {
+  if (layoutType === "STRIP_2X6_3" || layoutType === "STRIP_2X6") {
+    return (
+      <div className="flex h-10 w-4.5 flex-col justify-between rounded-[2px] bg-zinc-900 p-[2px] border border-zinc-700 shadow-2xs">
+        <div className="h-2 w-full rounded-[1px] bg-white" />
+        <div className="h-2 w-full rounded-[1px] bg-white" />
+        <div className="h-2 w-full rounded-[1px] bg-white" />
+        <div className="h-1.5 w-full bg-zinc-900" />
+      </div>
+    );
+  }
+
+  if (layoutType === "STRIP_2X6_4") {
+    return (
+      <div className="flex h-10 w-4.5 flex-col justify-between rounded-[2px] bg-zinc-900 p-[2px] border border-zinc-700 shadow-2xs">
+        <div className="h-1.5 w-full rounded-[1px] bg-white" />
+        <div className="h-1.5 w-full rounded-[1px] bg-white" />
+        <div className="h-1.5 w-full rounded-[1px] bg-white" />
+        <div className="h-1.5 w-full rounded-[1px] bg-white" />
+        <div className="h-1.5 w-full bg-zinc-900" />
+      </div>
+    );
+  }
+
+  if (layoutType === "CARD_4X6_6") {
+    return (
+      <div className="flex h-10 w-7 flex-col justify-between rounded-[2px] bg-zinc-900 p-[2px] border border-zinc-700 shadow-2xs">
+        <div className="grid grid-cols-2 gap-[1.5px] flex-1">
+          <div className="h-2 rounded-[1px] bg-white" />
+          <div className="h-2 rounded-[1px] bg-white" />
+          <div className="h-2 rounded-[1px] bg-white" />
+          <div className="h-2 rounded-[1px] bg-white" />
+          <div className="h-2 rounded-[1px] bg-white" />
+          <div className="h-2 rounded-[1px] bg-white" />
+        </div>
+        <div className="h-1.5 w-full bg-zinc-900" />
+      </div>
+    );
+  }
+
+  if (layoutType === "CARD_4X6_4" || layoutType === "GRID_4X6") {
+    return (
+      <div className="flex h-10 w-7 flex-col justify-between rounded-[2px] bg-zinc-900 p-[2px] border border-zinc-700 shadow-2xs">
+        <div className="grid grid-cols-2 gap-[2px] flex-1">
+          <div className="h-3 rounded-[1px] bg-white" />
+          <div className="h-3 rounded-[1px] bg-white" />
+          <div className="h-3 rounded-[1px] bg-white" />
+          <div className="h-3 rounded-[1px] bg-white" />
+        </div>
+        <div className="h-2 w-full bg-zinc-900" />
+      </div>
+    );
+  }
+
+  if (layoutType === "CARD_4X6_TRIPLE") {
+    return (
+      <div className="flex h-10 w-7 flex-col justify-between rounded-[2px] bg-zinc-900 p-[2px] border border-zinc-700 shadow-2xs">
+        <div className="flex gap-[1.5px] flex-1">
+          <div className="h-full flex-1 rounded-[1px] bg-white" />
+          <div className="h-full flex-1 rounded-[1px] bg-white" />
+          <div className="h-full flex-1 rounded-[1px] bg-white" />
+        </div>
+        <div className="h-2 w-full bg-zinc-900" />
+      </div>
+    );
+  }
+
+  if (layoutType === "CARD_4X6_2" || layoutType === "POLAROID") {
+    return (
+      <div className="flex h-10 w-7 flex-col justify-between rounded-[2px] bg-zinc-900 p-[2px] border border-zinc-700 shadow-2xs">
+        <div className="flex flex-col gap-[2px] flex-1">
+          <div className="h-3 w-full rounded-[1px] bg-white" />
+          <div className="h-3 w-full rounded-[1px] bg-white" />
+        </div>
+        <div className="h-2 w-full bg-zinc-900" />
+      </div>
+    );
+  }
+
+  // CARD_4X6_1 (Single)
+  return (
+    <div className="flex h-10 w-7 flex-col justify-between rounded-[2px] bg-zinc-900 p-[2px] border border-zinc-700 shadow-2xs">
+      <div className="h-6 w-full rounded-[1px] bg-white" />
+      <div className="h-2.5 w-full bg-zinc-900" />
+    </div>
+  );
+}
+
+// Clean editorial slot for live mockup
+function EditorialPoseSlot({
   poseNum,
   label,
 }: {
@@ -134,8 +289,8 @@ function EditorialLandscapeCard({
   label: string;
 }) {
   return (
-    <div className="relative flex flex-1 h-full flex-col items-center justify-between overflow-hidden rounded-[3px] p-1 bg-zinc-200/90 text-zinc-800 border border-black/5 select-none">
-      <div className="flex w-full items-center justify-between opacity-50 text-[6px] font-mono tracking-wider">
+    <div className="relative flex flex-1 w-full flex-col items-center justify-between overflow-hidden rounded-[3px] p-0.5 bg-zinc-200/90 text-zinc-800 border border-black/5 select-none min-h-[32px]">
+      <div className="flex w-full items-center justify-between opacity-50 text-[5px] font-mono tracking-wider">
         <span>P{poseNum}</span>
         <span>4:3</span>
       </div>
@@ -143,14 +298,14 @@ function EditorialLandscapeCard({
       <svg
         viewBox="0 0 64 64"
         fill="currentColor"
-        className="h-6 w-6 opacity-25 my-auto"
+        className="h-3.5 w-3.5 opacity-25 my-auto"
         aria-hidden="true"
       >
         <circle cx="32" cy="22" r="14" />
         <path d="M12 56c0-11 9-20 20-20s20 9 20 20H12z" />
       </svg>
 
-      <span className="text-[7px] font-semibold tracking-tight text-center opacity-80 truncate w-full">
+      <span className="text-[6px] font-semibold tracking-tight text-center opacity-80 truncate w-full">
         {label}
       </span>
     </div>
@@ -165,12 +320,19 @@ export function FrameSelectScreen({
   initialFrameColor = "#FFFFFF",
 }: FrameSelectScreenProps) {
   const [selectedFormatId, setSelectedFormatId] = useState<string>(initialTemplateId);
+  const [selectedCategory, setSelectedCategory] = useState<"ALL" | "STRIP" | "CARD">("ALL");
   const [themeMode, setThemeMode] = useState<"THEMES" | "SOLID">("THEMES");
   const [selectedThemeId, setSelectedThemeId] = useState<string>(initialThemeId);
   const [selectedColor, setSelectedColor] = useState<string>(initialFrameColor);
 
   const currentTemplate = TEMPLATES.find((t) => t.id === selectedFormatId) || TEMPLATES[0];
   const currentTheme = THEME_OPTIONS.find((t) => t.id === selectedThemeId) || THEME_OPTIONS[0];
+
+  const filteredTemplates = TEMPLATES.filter((t) => {
+    if (selectedCategory === "STRIP") return t.category === "STRIP";
+    if (selectedCategory === "CARD") return t.category === "CARD";
+    return true;
+  });
 
   const handleSelectFormat = (tmpl: TemplateChoice) => {
     sounds.playClick();
@@ -209,16 +371,16 @@ export function FrameSelectScreen({
   };
 
   return (
-    <div className="relative flex h-screen w-screen flex-col justify-between bg-zinc-100 p-5 md:p-6 select-none font-sans overflow-hidden text-zinc-900">
+    <div className="relative flex h-screen w-screen flex-col justify-between bg-zinc-100 p-4 md:p-5 select-none font-sans overflow-hidden text-zinc-900">
       {/* Top Bar Header */}
-      <div className="flex items-center justify-between border-b border-zinc-200/90 pb-3">
+      <div className="flex items-center justify-between border-b border-zinc-200/90 pb-2.5">
         <button
           type="button"
           onClick={() => {
             sounds.playClick();
             onBack();
           }}
-          className="flex min-h-[48px] items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-zinc-700 border border-zinc-200 shadow-2xs transition active:scale-95 hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900"
+          className="flex min-h-[44px] items-center gap-2 rounded-xl bg-white px-4 py-2 text-xs font-bold uppercase tracking-wider text-zinc-700 border border-zinc-200 shadow-2xs transition active:scale-95 hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 cursor-pointer"
         >
           <ArrowLeft className="h-4 w-4" />
           <span>Kembali</span>
@@ -226,204 +388,313 @@ export function FrameSelectScreen({
 
         <div className="text-center">
           <span className="text-[10px] font-mono font-bold tracking-widest text-zinc-500 uppercase block">
-            Langkah 1 dari 3 • Konfigurasi Cetak
+            Langkah 1 dari 3 • Konfigurasi Format
           </span>
-          <h2 className="text-lg md:text-xl font-bold tracking-tight text-zinc-900 mt-0.5">
-            Pilih Format Kertas Landscape & Desain Frame
+          <h2 className="text-base md:text-lg font-bold tracking-tight text-zinc-900 mt-0.5">
+            Pilih Desain Template & Frame Vertikal
           </h2>
         </div>
 
         <div className="w-32 text-right font-mono text-xs font-semibold text-zinc-600">
-          Format: 4R Landscape
+          Format: 4R Vertikal
         </div>
       </div>
 
       {/* Main Touch Interaction Stage */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 my-auto max-w-6xl w-full mx-auto items-center flex-1 py-2 overflow-hidden">
-        {/* LEFT COLUMN: Physical Paper Sheet Live Mockup (3:2 Landscape) */}
-        <div className="md:col-span-5 flex flex-col items-center justify-center p-5 rounded-2xl bg-zinc-200/60 border border-zinc-300/80 shadow-inner h-full max-h-[500px]">
-          <div className="w-full flex items-center justify-between text-xs font-mono text-zinc-600 mb-2 px-1">
-            <span className="font-bold uppercase tracking-wider text-zinc-800">
-              {currentTemplate.name}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-5 my-auto max-w-6xl w-full mx-auto items-center flex-1 py-1 overflow-hidden">
+        {/* LEFT COLUMN: Physical Paper Sheet Live Mockup (2:3 Portrait) */}
+        <div className="md:col-span-5 flex flex-col items-center justify-center p-3.5 rounded-2xl bg-zinc-200/60 border border-zinc-300/80 shadow-inner h-full max-h-[500px]">
+          <div className="w-full flex items-center justify-between text-xs font-mono text-zinc-600 mb-1.5 px-1">
+            <span className="font-bold uppercase tracking-wider text-zinc-800 truncate max-w-[200px]">
+              {currentTemplate.shortName}
             </span>
             <span className="font-semibold">{currentTemplate.slotsCount} Total Pose</span>
           </div>
 
-          {/* PHYSICAL SHEET MOCKUP CONTAINER (3:2 LANDSCAPE 4R) */}
-          <div className="relative flex items-center justify-center w-full flex-1 max-h-[360px]">
-            {/* 1. TWIN FILM STRIP (2 HORIZONTAL STRIPS ON 4R LANDSCAPE) */}
-            {currentTemplate.layoutType === "STRIP_2X6" && (
+          {/* PHYSICAL SHEET MOCKUP CONTAINER (2:3 PORTRAIT 4R) */}
+          <div className="relative flex items-center justify-center w-full flex-1 max-h-[380px]">
+            {/* 1. STRIP_2X6_3 (2x6" 3 Photo - 2 Strips Side by Side) */}
+            {(currentTemplate.layoutType === "STRIP_2X6_3" ||
+              currentTemplate.layoutType === "STRIP_2X6") && (
               <div
                 style={{ backgroundColor: getThemeBackgroundHex(), color: getThemeTextColor() }}
-                className="relative flex h-[260px] w-[385px] flex-col justify-between rounded-lg p-2.5 shadow-xl border border-zinc-300 transition-colors duration-200"
+                className="relative flex h-[350px] w-[234px] justify-between rounded-lg p-2 shadow-xl border border-zinc-300 transition-colors duration-200"
               >
-                {/* STRIP 1 (TOP) */}
-                <div className="flex h-[112px] w-full items-center justify-between gap-1.5">
-                  <div className="flex flex-1 items-center gap-1.5 h-full">
-                    <EditorialLandscapeCard poseNum={1} label="Pose Utama" />
-                    <EditorialLandscapeCard poseNum={2} label="Pose Senyum" />
-                    <EditorialLandscapeCard poseNum={3} label="Pose Bebas" />
+                {/* STRIP 1 (LEFT) */}
+                <div className="flex h-full w-[104px] flex-col justify-between gap-1">
+                  <div className="flex flex-col gap-1 flex-1">
+                    <EditorialPoseSlot poseNum={1} label="Pose 1" />
+                    <EditorialPoseSlot poseNum={2} label="Pose 2" />
+                    <EditorialPoseSlot poseNum={3} label="Pose 3" />
                   </div>
-                  {/* Right Studio Branding Block */}
-                  <div className="flex h-full w-[76px] flex-col items-center justify-between rounded bg-black/5 p-1 border border-black/10 text-center">
+                  <div className="flex w-full flex-col items-center justify-center rounded bg-black/5 p-1 border border-black/10 text-center">
                     <span className="text-[6px] font-mono font-bold uppercase tracking-wider block opacity-75">
                       STRIP 1
                     </span>
-                    <span className="text-[8px] font-bold block leading-tight">
-                      KIOSKSNAP
-                    </span>
-                    <span className="text-[6px] font-mono opacity-60 block">
-                      300 DPI
-                    </span>
+                    <span className="text-[8px] font-bold block leading-tight">KIOSKSNAP</span>
+                    <span className="text-[5px] font-mono opacity-60 block">300 DPI</span>
                   </div>
                 </div>
 
-                {/* Perforation Guideline (Horizontal) */}
-                <div className="relative flex w-full items-center justify-center py-1">
-                  <div className="w-full border-b border-dashed border-zinc-400 opacity-60" />
-                  <span className="absolute text-[7px] font-mono text-zinc-500 bg-white/80 px-1.5 py-0.5 rounded border border-zinc-200 shadow-2xs">
-                    ✄ POTONG DI SINI
+                {/* Perforation Guideline (Vertical) */}
+                <div className="relative flex h-full flex-col items-center justify-center px-0.5">
+                  <div className="h-full border-r border-dashed border-zinc-400 opacity-60" />
+                  <span className="absolute text-[6px] font-mono text-zinc-600 bg-white/90 px-1 py-0.5 rounded border border-zinc-200 shadow-2xs whitespace-nowrap">
+                    ✄ POTONG
                   </span>
                 </div>
 
-                {/* STRIP 2 (BOTTOM - DIFFERENT POSES!) */}
-                <div className="flex h-[112px] w-full items-center justify-between gap-1.5">
-                  <div className="flex flex-1 items-center gap-1.5 h-full">
-                    <EditorialLandscapeCard poseNum={4} label="Pose Candid" />
-                    <EditorialLandscapeCard poseNum={5} label="Pose Lucu" />
-                    <EditorialLandscapeCard poseNum={6} label="Pose Penutup" />
+                {/* STRIP 2 (RIGHT) */}
+                <div className="flex h-full w-[104px] flex-col justify-between gap-1">
+                  <div className="flex flex-col gap-1 flex-1">
+                    <EditorialPoseSlot poseNum={1} label="Pose 1" />
+                    <EditorialPoseSlot poseNum={2} label="Pose 2" />
+                    <EditorialPoseSlot poseNum={3} label="Pose 3" />
                   </div>
-                  {/* Right Studio Branding Block */}
-                  <div className="flex h-full w-[76px] flex-col items-center justify-between rounded bg-black/5 p-1 border border-black/10 text-center">
+                  <div className="flex w-full flex-col items-center justify-center rounded bg-black/5 p-1 border border-black/10 text-center">
                     <span className="text-[6px] font-mono font-bold uppercase tracking-wider block opacity-75">
                       STRIP 2
                     </span>
-                    <span className="text-[8px] font-bold block leading-tight">
-                      KIOSKSNAP
-                    </span>
-                    <span className="text-[6px] font-mono opacity-60 block">
-                      300 DPI
-                    </span>
+                    <span className="text-[8px] font-bold block leading-tight">KIOSKSNAP</span>
+                    <span className="text-[5px] font-mono opacity-60 block">300 DPI</span>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* 2. MODERN CARD 4X6 (2x2 GRID LANDSCAPE) */}
-            {currentTemplate.layoutType === "GRID_4X6" && (
+            {/* 2. STRIP_2X6_4 (2x6" 4 Photo - Korean 4-Cuts) */}
+            {currentTemplate.layoutType === "STRIP_2X6_4" && (
               <div
                 style={{ backgroundColor: getThemeBackgroundHex(), color: getThemeTextColor() }}
-                className="relative flex h-[260px] w-[385px] flex-col justify-between rounded-xl p-3 shadow-xl border border-zinc-300 transition-colors duration-200"
+                className="relative flex h-[350px] w-[234px] justify-between rounded-lg p-2 shadow-xl border border-zinc-300 transition-colors duration-200"
               >
-                <div className="grid grid-cols-2 gap-2 flex-1">
-                  <EditorialLandscapeCard poseNum={1} label="Pose 1" />
-                  <EditorialLandscapeCard poseNum={2} label="Pose 2" />
-                  <EditorialLandscapeCard poseNum={3} label="Pose 3" />
-                  <EditorialLandscapeCard poseNum={4} label="Pose 4" />
+                {/* STRIP 1 (LEFT) */}
+                <div className="flex h-full w-[104px] flex-col justify-between gap-1">
+                  <div className="flex flex-col gap-1 flex-1">
+                    <EditorialPoseSlot poseNum={1} label="Pose 1" />
+                    <EditorialPoseSlot poseNum={2} label="Pose 2" />
+                    <EditorialPoseSlot poseNum={3} label="Pose 3" />
+                    <EditorialPoseSlot poseNum={4} label="Pose 4" />
+                  </div>
+                  <div className="flex w-full flex-col items-center justify-center rounded bg-black/5 p-0.5 border border-black/10 text-center">
+                    <span className="text-[6px] font-mono font-bold uppercase block opacity-75">
+                      4-CUTS
+                    </span>
+                    <span className="text-[7px] font-bold block leading-tight">KIOSKSNAP</span>
+                  </div>
                 </div>
-                <div className="flex items-center justify-between pt-1.5 border-t border-black/10 text-[8px] font-mono opacity-80">
-                  <span>POSTCARD LANDSCAPE • 4R</span>
-                  <span>KIOSKSNAP STUDIO</span>
+
+                {/* Perforation Guideline (Vertical) */}
+                <div className="relative flex h-full flex-col items-center justify-center px-0.5">
+                  <div className="h-full border-r border-dashed border-zinc-400 opacity-60" />
+                  <span className="absolute text-[6px] font-mono text-zinc-600 bg-white/90 px-1 py-0.5 rounded border border-zinc-200 shadow-2xs whitespace-nowrap">
+                    ✄ POTONG
+                  </span>
+                </div>
+
+                {/* STRIP 2 (RIGHT) */}
+                <div className="flex h-full w-[104px] flex-col justify-between gap-1">
+                  <div className="flex flex-col gap-1 flex-1">
+                    <EditorialPoseSlot poseNum={1} label="Pose 1" />
+                    <EditorialPoseSlot poseNum={2} label="Pose 2" />
+                    <EditorialPoseSlot poseNum={3} label="Pose 3" />
+                    <EditorialPoseSlot poseNum={4} label="Pose 4" />
+                  </div>
+                  <div className="flex w-full flex-col items-center justify-center rounded bg-black/5 p-0.5 border border-black/10 text-center">
+                    <span className="text-[6px] font-mono font-bold uppercase block opacity-75">
+                      4-CUTS
+                    </span>
+                    <span className="text-[7px] font-bold block leading-tight">KIOSKSNAP</span>
+                  </div>
                 </div>
               </div>
             )}
 
-            {/* 3. TWIN POLAROID (SIDE-BY-SIDE ON 4R LANDSCAPE) */}
-            {currentTemplate.layoutType === "POLAROID" && (
+            {/* 3. CARD_4X6_6 (4x6" 6 Photo - 2x3 Grid) */}
+            {currentTemplate.layoutType === "CARD_4X6_6" && (
               <div
                 style={{ backgroundColor: getThemeBackgroundHex(), color: getThemeTextColor() }}
-                className="relative flex h-[260px] w-[385px] justify-between rounded-xl p-2.5 shadow-xl border border-zinc-300 transition-colors duration-200"
+                className="relative flex h-[350px] w-[234px] flex-col justify-between rounded-xl p-2.5 shadow-xl border border-zinc-300 transition-colors duration-200"
               >
-                {/* POLAROID 1 */}
-                <div className="flex h-full w-[180px] flex-col justify-between">
-                  <div className="text-center pb-0.5">
-                    <span className="text-[7px] font-mono tracking-widest uppercase opacity-75 font-bold block">
-                      KARTU 1 • POSE 1-2
-                    </span>
-                  </div>
-                  <div className="space-y-1.5 flex-1">
-                    <EditorialLandscapeCard poseNum={1} label="Pose 1" />
-                    <EditorialLandscapeCard poseNum={2} label="Pose 2" />
-                  </div>
-                  <div className="mt-1 rounded bg-black/5 p-1 text-center border border-dashed border-black/10">
-                    <span className="text-[8px] font-serif italic block">Sweet Memories</span>
+                <div className="grid grid-cols-2 gap-1 flex-1 max-h-[235px]">
+                  <EditorialPoseSlot poseNum={1} label="Pose 1" />
+                  <EditorialPoseSlot poseNum={2} label="Pose 2" />
+                  <EditorialPoseSlot poseNum={3} label="Pose 3" />
+                  <EditorialPoseSlot poseNum={4} label="Pose 4" />
+                  <EditorialPoseSlot poseNum={5} label="Pose 5" />
+                  <EditorialPoseSlot poseNum={6} label="Pose 6" />
+                </div>
+                <div className="flex flex-col gap-0.5 pt-1.5 border-t border-black/10 text-[7px] font-mono opacity-80">
+                  <div className="flex justify-between items-center">
+                    <span>4×6\" 6-SHOTS GRID</span>
+                    <span>KIOSKSNAP</span>
                   </div>
                 </div>
+              </div>
+            )}
 
-                <div className="h-full w-[1px] border-r border-dashed border-zinc-400 opacity-60" />
+            {/* 4. CARD_4X6_4 (4x6" 4 Photo - 2x2 Grid) */}
+            {(currentTemplate.layoutType === "CARD_4X6_4" ||
+              currentTemplate.layoutType === "GRID_4X6") && (
+              <div
+                style={{ backgroundColor: getThemeBackgroundHex(), color: getThemeTextColor() }}
+                className="relative flex h-[350px] w-[234px] flex-col justify-between rounded-xl p-2.5 shadow-xl border border-zinc-300 transition-colors duration-200"
+              >
+                <div className="grid grid-cols-2 gap-1.5 flex-1 max-h-[220px]">
+                  <EditorialPoseSlot poseNum={1} label="Pose 1" />
+                  <EditorialPoseSlot poseNum={2} label="Pose 2" />
+                  <EditorialPoseSlot poseNum={3} label="Pose 3" />
+                  <EditorialPoseSlot poseNum={4} label="Pose 4" />
+                </div>
+                <div className="flex flex-col gap-1 pt-2 border-t border-black/10 text-[7px] font-mono opacity-80">
+                  <div className="flex justify-between items-center">
+                    <span>4×6\" 4 PHOTO POSTCARD</span>
+                    <span>KIOSKSNAP</span>
+                  </div>
+                </div>
+              </div>
+            )}
 
-                {/* POLAROID 2 */}
-                <div className="flex h-full w-[180px] flex-col justify-between">
-                  <div className="text-center pb-0.5">
-                    <span className="text-[7px] font-mono tracking-widest uppercase opacity-75 font-bold block">
-                      KARTU 2 • POSE 3-4
-                    </span>
+            {/* 5. CARD_4X6_TRIPLE (4x6" Triple Photo) */}
+            {currentTemplate.layoutType === "CARD_4X6_TRIPLE" && (
+              <div
+                style={{ backgroundColor: getThemeBackgroundHex(), color: getThemeTextColor() }}
+                className="relative flex h-[350px] w-[234px] flex-col justify-between rounded-xl p-2.5 shadow-xl border border-zinc-300 transition-colors duration-200"
+              >
+                <div className="flex gap-1.5 flex-1 max-h-[220px]">
+                  <EditorialPoseSlot poseNum={1} label="Pose 1" />
+                  <EditorialPoseSlot poseNum={2} label="Pose 2" />
+                  <EditorialPoseSlot poseNum={3} label="Pose 3" />
+                </div>
+                <div className="flex flex-col gap-1 pt-2 border-t border-black/10 text-[7px] font-mono opacity-80">
+                  <div className="flex justify-between items-center">
+                    <span>4×6\" TRIPLE PHOTO</span>
+                    <span>KIOSKSNAP</span>
                   </div>
-                  <div className="space-y-1.5 flex-1">
-                    <EditorialLandscapeCard poseNum={3} label="Pose 3" />
-                    <EditorialLandscapeCard poseNum={4} label="Pose 4" />
-                  </div>
-                  <div className="mt-1 rounded bg-black/5 p-1 text-center border border-dashed border-black/10">
-                    <span className="text-[8px] font-serif italic block">Together Forever</span>
-                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 6. CARD_4X6_2 (4x6" 2 Photo) */}
+            {(currentTemplate.layoutType === "CARD_4X6_2" ||
+              currentTemplate.layoutType === "POLAROID") && (
+              <div
+                style={{ backgroundColor: getThemeBackgroundHex(), color: getThemeTextColor() }}
+                className="relative flex h-[350px] w-[234px] flex-col justify-between rounded-xl p-2.5 shadow-xl border border-zinc-300 transition-colors duration-200"
+              >
+                <div className="flex flex-col gap-1.5 flex-1 max-h-[230px]">
+                  <EditorialPoseSlot poseNum={1} label="Pose 1" />
+                  <EditorialPoseSlot poseNum={2} label="Pose 2" />
+                </div>
+                <div className="rounded bg-black/5 p-1 text-center border border-dashed border-black/10 mt-1">
+                  <span className="text-[8px] font-serif italic block">Together Forever</span>
+                </div>
+              </div>
+            )}
+
+            {/* 7. CARD_4X6_1 (4x6" Single Photo) */}
+            {currentTemplate.layoutType === "CARD_4X6_1" && (
+              <div
+                style={{ backgroundColor: getThemeBackgroundHex(), color: getThemeTextColor() }}
+                className="relative flex h-[350px] w-[234px] flex-col justify-between rounded-xl p-2.5 shadow-xl border border-zinc-300 transition-colors duration-200"
+              >
+                <div className="flex-1 max-h-[250px] flex">
+                  <EditorialPoseSlot poseNum={1} label="Pose Utama (Single)" />
+                </div>
+                <div className="rounded bg-black/5 p-1 text-center border border-dashed border-black/10 mt-1">
+                  <span className="text-[9px] font-serif italic block">Sweet Memories</span>
                 </div>
               </div>
             )}
           </div>
 
-          <div className="mt-2 text-center text-xs font-semibold text-zinc-700 bg-white/90 px-4 py-1.5 rounded-full border border-zinc-200 shadow-2xs">
+          <div className="mt-2 text-center text-xs font-semibold text-zinc-700 bg-white/90 px-3.5 py-1 rounded-full border border-zinc-200 shadow-2xs">
             {currentTemplate.headline}
           </div>
         </div>
 
         {/* RIGHT COLUMN: Touch Friendly Selection Controls */}
-        <div className="md:col-span-7 flex flex-col justify-between space-y-4 h-full">
-          {/* STEP 1: PILIH FORMAT KERTAS */}
+        <div className="md:col-span-7 flex flex-col justify-between space-y-3.5 h-full">
+          {/* STEP 1: PILIH TEMPLATE */}
           <div>
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-bold uppercase tracking-wider text-zinc-800">
-                1. Pilih Format Kertas Cetak Landscape
+                1. Pilih Format Template Desain
               </span>
-              <span className="text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                {currentTemplate.badge}
-              </span>
+
+              {/* Category Filter Pills */}
+              <div className="flex rounded-lg bg-zinc-200 p-0.5 text-[11px] font-bold">
+                <button
+                  type="button"
+                  onClick={() => {
+                    sounds.playClick();
+                    setSelectedCategory("ALL");
+                  }}
+                  className={`px-2.5 py-1 rounded-md transition cursor-pointer ${
+                    selectedCategory === "ALL"
+                      ? "bg-white text-zinc-900 shadow-2xs"
+                      : "text-zinc-600 hover:text-zinc-900"
+                  }`}
+                >
+                  Semua ({TEMPLATES.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    sounds.playClick();
+                    setSelectedCategory("STRIP");
+                  }}
+                  className={`px-2.5 py-1 rounded-md transition cursor-pointer ${
+                    selectedCategory === "STRIP"
+                      ? "bg-white text-zinc-900 shadow-2xs"
+                      : "text-zinc-600 hover:text-zinc-900"
+                  }`}
+                >
+                  Strip 2×6\"
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    sounds.playClick();
+                    setSelectedCategory("CARD");
+                  }}
+                  className={`px-2.5 py-1 rounded-md transition cursor-pointer ${
+                    selectedCategory === "CARD"
+                      ? "bg-white text-zinc-900 shadow-2xs"
+                      : "text-zinc-600 hover:text-zinc-900"
+                  }`}
+                >
+                  Kartu 4×6\"
+                </button>
+              </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-2.5">
-              {TEMPLATES.map((tmpl) => {
+            {/* Template Card Selection Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-[195px] overflow-y-auto pr-1">
+              {filteredTemplates.map((tmpl) => {
                 const isSelected = selectedFormatId === tmpl.id;
                 return (
                   <button
                     key={tmpl.id}
                     type="button"
                     onClick={() => handleSelectFormat(tmpl)}
-                    className={`relative flex min-h-[76px] flex-col justify-between rounded-xl p-3 text-left transition active:scale-95 border cursor-pointer ${
+                    className={`relative flex min-h-[64px] items-center gap-2.5 rounded-xl p-2.5 text-left transition active:scale-95 border cursor-pointer ${
                       isSelected
                         ? "bg-white border-zinc-900 shadow-md ring-2 ring-zinc-900"
                         : "bg-white/80 border-zinc-200 hover:border-zinc-350 hover:bg-white"
                     }`}
                   >
-                    <div className="flex items-center justify-between w-full">
-                      <span className="text-xs font-bold text-zinc-900">
-                        {tmpl.shortName}
-                      </span>
-                      <div
-                        className={`flex h-4 w-4 items-center justify-center rounded-full border ${
-                          isSelected
-                            ? "bg-zinc-900 border-zinc-900 text-white"
-                            : "border-zinc-300 bg-zinc-50 text-transparent"
-                        }`}
-                      >
-                        <Check className="h-2.5 w-2.5" />
-                      </div>
-                    </div>
+                    <TemplateSilhouetteIcon layoutType={tmpl.layoutType} />
 
-                    <div className="mt-1">
-                      <span className="text-xs font-bold text-zinc-900 block">
-                        {tmpl.slotsCount} Pose
-                      </span>
-                      <span className="text-[10px] text-zinc-500 block truncate">
-                        {tmpl.posesPerStrip} pose / lembar
+                    <div className="overflow-hidden flex-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-zinc-900 truncate">
+                          {tmpl.shortName}
+                        </span>
+                        {isSelected && <Check className="h-3 w-3 text-zinc-900 shrink-0" />}
+                      </div>
+                      <span className="text-[10px] font-semibold text-zinc-600 block">
+                        {tmpl.slotsCount} Pose • {tmpl.printCopies} Lembar
                       </span>
                     </div>
                   </button>
@@ -436,7 +707,7 @@ export function FrameSelectScreen({
           <div>
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-bold uppercase tracking-wider text-zinc-800">
-                2. Pilih Desain dan Warna Frame
+                2. Pilih Desain & Warna Frame
               </span>
 
               {/* Toggle: Koleksi Desain vs Warna Solid */}
@@ -447,7 +718,7 @@ export function FrameSelectScreen({
                     sounds.playClick();
                     setThemeMode("THEMES");
                   }}
-                  className={`flex items-center gap-1 rounded-md px-2.5 py-1 transition ${
+                  className={`flex items-center gap-1 rounded-md px-2.5 py-1 transition cursor-pointer ${
                     themeMode === "THEMES"
                       ? "bg-white text-zinc-900 shadow-2xs"
                       : "text-zinc-600 hover:text-zinc-900"
@@ -463,7 +734,7 @@ export function FrameSelectScreen({
                     setThemeMode("SOLID");
                     setSelectedThemeId("CLASSIC");
                   }}
-                  className={`flex items-center gap-1 rounded-md px-2.5 py-1 transition ${
+                  className={`flex items-center gap-1 rounded-md px-2.5 py-1 transition cursor-pointer ${
                     themeMode === "SOLID"
                       ? "bg-white text-zinc-900 shadow-2xs"
                       : "text-zinc-600 hover:text-zinc-900"
@@ -485,7 +756,7 @@ export function FrameSelectScreen({
                       key={theme.id}
                       type="button"
                       onClick={() => handleSelectTheme(theme.id)}
-                      className={`flex min-h-[58px] items-center gap-2.5 rounded-xl p-2.5 text-left transition active:scale-95 border cursor-pointer ${
+                      className={`flex min-h-[52px] items-center gap-2 rounded-xl p-2 text-left transition active:scale-95 border cursor-pointer ${
                         isSelected
                           ? "bg-white border-zinc-900 shadow-sm ring-2 ring-zinc-900"
                           : "bg-white/80 border-zinc-200 hover:border-zinc-350 hover:bg-white"
@@ -493,7 +764,7 @@ export function FrameSelectScreen({
                     >
                       <div
                         style={{ backgroundColor: theme.bgHex, borderColor: theme.borderHex }}
-                        className="h-8 w-8 rounded-lg border-2 shadow-2xs shrink-0"
+                        className="h-7 w-7 rounded-lg border-2 shadow-2xs shrink-0"
                       />
                       <div className="overflow-hidden">
                         <span className="text-xs font-bold text-zinc-900 block truncate">
@@ -519,7 +790,7 @@ export function FrameSelectScreen({
                       key={col.hex}
                       type="button"
                       onClick={() => handleSelectColor(col.hex)}
-                      className={`flex min-h-[58px] items-center gap-2.5 rounded-xl p-2.5 text-left transition active:scale-95 border cursor-pointer ${
+                      className={`flex min-h-[52px] items-center gap-2 rounded-xl p-2 text-left transition active:scale-95 border cursor-pointer ${
                         isSelected
                           ? "bg-white border-zinc-900 shadow-sm ring-2 ring-zinc-900"
                           : "bg-white/80 border-zinc-200 hover:border-zinc-350 hover:bg-white"
@@ -527,7 +798,7 @@ export function FrameSelectScreen({
                     >
                       <div
                         style={{ backgroundColor: col.hex }}
-                        className="h-8 w-8 rounded-full border-2 border-zinc-300 shadow-2xs shrink-0"
+                        className="h-7 w-7 rounded-full border-2 border-zinc-300 shadow-2xs shrink-0"
                       />
                       <div>
                         <span className="text-xs font-bold text-zinc-900 block">
@@ -545,16 +816,16 @@ export function FrameSelectScreen({
           </div>
 
           {/* LARGE TOUCH CTA BUTTON */}
-          <div className="pt-2">
+          <div className="pt-1">
             <button
               type="button"
               onClick={handleConfirm}
-              className="flex min-h-[58px] w-full items-center justify-center gap-2.5 rounded-xl bg-zinc-900 px-6 text-base font-bold text-white shadow-md transition active:scale-[0.98] hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 cursor-pointer"
+              className="flex min-h-[54px] w-full items-center justify-center gap-2 rounded-xl bg-zinc-900 px-6 text-sm md:text-base font-bold text-white shadow-md transition active:scale-[0.98] hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 cursor-pointer"
             >
               <span>Mulai Sesi Foto ({currentTemplate.slotsCount} Pose)</span>
               <ChevronRight className="h-5 w-5" />
             </button>
-            <p className="text-center text-[11px] text-zinc-600 mt-1.5">
+            <p className="text-center text-[10px] text-zinc-600 mt-1">
               {currentTemplate.subHeadline}
             </p>
           </div>
