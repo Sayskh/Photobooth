@@ -209,7 +209,7 @@ export function PaymentScreen({
                   key={key}
                   type="button"
                   onClick={() => handleKeypadPress(key)}
-                  className="flex min-h-[50px] md:min-h-[54px] items-center justify-center rounded-xl bg-zinc-50 text-xl font-semibold text-zinc-900 border border-zinc-200 tap-bounce hover:bg-zinc-100 cursor-pointer"
+                  className="flex min-h-[50px] md:min-h-[54px] items-center justify-center rounded-xl bg-zinc-50 text-xl font-semibold text-zinc-900 border border-zinc-200 tap-bounce hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 cursor-pointer"
                 >
                   {key}
                 </button>
@@ -218,7 +218,7 @@ export function PaymentScreen({
               <button
                 type="button"
                 onClick={() => handleKeypadPress("CLEAR")}
-                className="flex min-h-[50px] md:min-h-[54px] items-center justify-center rounded-xl bg-zinc-100 text-xs font-semibold text-zinc-700 border border-zinc-200 tap-bounce hover:bg-zinc-200 cursor-pointer"
+                className="flex min-h-[50px] md:min-h-[54px] items-center justify-center rounded-xl bg-zinc-100 text-xs font-semibold text-zinc-700 border border-zinc-200 tap-bounce hover:bg-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 cursor-pointer"
               >
                 Reset
               </button>
@@ -226,7 +226,7 @@ export function PaymentScreen({
               <button
                 type="button"
                 onClick={() => handleKeypadPress("0")}
-                className="flex min-h-[50px] md:min-h-[54px] items-center justify-center rounded-xl bg-zinc-50 text-xl font-semibold text-zinc-900 border border-zinc-200 tap-bounce hover:bg-zinc-100 cursor-pointer"
+                className="flex min-h-[50px] md:min-h-[54px] items-center justify-center rounded-xl bg-zinc-50 text-xl font-semibold text-zinc-900 border border-zinc-200 tap-bounce hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 cursor-pointer"
               >
                 0
               </button>
@@ -234,7 +234,7 @@ export function PaymentScreen({
               <button
                 type="button"
                 onClick={() => handleKeypadPress("BACKSPACE")}
-                className="flex min-h-[50px] md:min-h-[54px] items-center justify-center rounded-xl bg-zinc-100 text-zinc-700 border border-zinc-200 tap-bounce hover:bg-zinc-200 cursor-pointer"
+                className="flex min-h-[50px] md:min-h-[54px] items-center justify-center rounded-xl bg-zinc-100 text-zinc-700 border border-zinc-200 tap-bounce hover:bg-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 cursor-pointer"
                 aria-label="Hapus satu angka"
               >
                 <Delete className="h-5 w-5" />

@@ -1,5 +1,28 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { z } from "zod";
+
+// Max 15MB base64 string (~11MB image data)
+const MAX_BASE64_LENGTH = 15 * 1024 * 1024;
+
+const compositeSchema = z.object({
+  frameTemplateId: z.string().trim().min(1).max(100),
+  filterSelected: z.string().trim().max(50).default("NORMAL"),
+  frameColor: z.string().trim().max(30).default("#FFFFFF"),
+  stickersData: z.unknown().optional(),
+  finalImagePath: z
+    .string()
+    .trim()
+    .min(10)
+    .max(MAX_BASE64_LENGTH, "Ukuran gambar terlalu besar (maksimal 15MB).")
+    .refine(
+      (val) => val.startsWith("data:image/") || val.startsWith("/uploads/") || val.startsWith("http"),
+      {
+        message: "Format finalImagePath harus berupa Data URL (data:image/...) atau URL valid.",
+      }
+    ),
+  videoMontageUrl: z.string().trim().max(MAX_BASE64_LENGTH).nullable().optional(),
+});
 
 export async function POST(
   req: Request,
@@ -7,6 +30,28 @@ export async function POST(
 ) {
   try {
     const { id: sessionId } = await params;
+
+    if (!sessionId) {
+      return NextResponse.json(
+        { success: false, message: "ID sesi diperlukan." },
+        { status: 400 }
+      );
+    }
+
+    const rawBody = await req.json().catch(() => ({}));
+    const parseResult = compositeSchema.safeParse(rawBody);
+
+    if (!parseResult.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Data komposit tidak valid.",
+          errors: parseResult.error.flatten().fieldErrors,
+        },
+        { status: 400 }
+      );
+    }
+
     const {
       frameTemplateId,
       filterSelected,
@@ -14,14 +59,7 @@ export async function POST(
       stickersData,
       finalImagePath,
       videoMontageUrl,
-    } = await req.json();
-
-    if (!sessionId || !frameTemplateId || !finalImagePath) {
-      return NextResponse.json(
-        { success: false, message: "Data komposit tidak lengkap." },
-        { status: 400 }
-      );
-    }
+    } = parseResult.data;
 
     const session = await prisma.session.findUnique({
       where: { id: sessionId },

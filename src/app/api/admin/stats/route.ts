@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAdminAuth } from "@/lib/adminAuth";
 
-export async function GET() {
+export async function GET(req: Request) {
+  const unauth = await requireAdminAuth(req);
+  if (unauth) return unauth;
+
   try {
     const totalSessions = await prisma.session.count();
     const completedSessions = await prisma.session.count({

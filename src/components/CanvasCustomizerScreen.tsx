@@ -230,7 +230,7 @@ export function CanvasCustomizerScreen({
   const timeFormatted = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
 
   return (
-    <div className="relative flex h-screen w-screen flex-col justify-between studio-bg p-4 md:p-5 select-none overflow-hidden font-sans text-zinc-900">
+    <div className="relative flex min-h-dvh flex-col justify-between studio-bg p-4 md:p-5 select-none overflow-y-auto no-scrollbar font-sans text-zinc-900">
       {/* Top Header Bar */}
       <div className="flex items-center justify-between border-b border-zinc-200/80 pb-3">
         <div className="flex items-center gap-3">
@@ -479,7 +479,7 @@ export function CanvasCustomizerScreen({
                         type="button"
                         onClick={handleRotateSticker}
                         aria-label="Putar stiker"
-                        className="flex min-h-[42px] flex-1 items-center justify-center gap-1 rounded-xl bg-white border border-zinc-200 text-xs font-semibold text-zinc-800 hover:bg-zinc-100 tap-bounce shadow-2xs cursor-pointer"
+                        className="flex min-h-[44px] min-w-[44px] flex-1 items-center justify-center gap-1 rounded-xl bg-white border border-zinc-200 text-xs font-semibold text-zinc-800 hover:bg-zinc-100 tap-bounce shadow-2xs cursor-pointer"
                       >
                         <RotateCw className="h-3.5 w-3.5 text-zinc-700" />
                         <span>Putar</span>
@@ -489,7 +489,7 @@ export function CanvasCustomizerScreen({
                         type="button"
                         onClick={() => handleScaleSticker(0.2)}
                         aria-label="Perbesar stiker"
-                        className="flex min-h-[42px] flex-1 items-center justify-center gap-1 rounded-xl bg-white border border-zinc-200 text-xs font-semibold text-zinc-800 hover:bg-zinc-100 tap-bounce shadow-2xs cursor-pointer"
+                        className="flex min-h-[44px] min-w-[44px] flex-1 items-center justify-center gap-1 rounded-xl bg-white border border-zinc-200 text-xs font-semibold text-zinc-800 hover:bg-zinc-100 tap-bounce shadow-2xs cursor-pointer"
                       >
                         <Plus className="h-3.5 w-3.5 text-zinc-700" />
                         <span>Besar</span>
@@ -499,7 +499,7 @@ export function CanvasCustomizerScreen({
                         type="button"
                         onClick={() => handleScaleSticker(-0.2)}
                         aria-label="Perkecil stiker"
-                        className="flex min-h-[42px] flex-1 items-center justify-center gap-1 rounded-xl bg-white border border-zinc-200 text-xs font-semibold text-zinc-800 hover:bg-zinc-100 tap-bounce shadow-2xs cursor-pointer"
+                        className="flex min-h-[44px] min-w-[44px] flex-1 items-center justify-center gap-1 rounded-xl bg-white border border-zinc-200 text-xs font-semibold text-zinc-800 hover:bg-zinc-100 tap-bounce shadow-2xs cursor-pointer"
                       >
                         <Minus className="h-3.5 w-3.5 text-zinc-700" />
                         <span>Kecil</span>
@@ -509,7 +509,7 @@ export function CanvasCustomizerScreen({
                         type="button"
                         onClick={handleDeleteSticker}
                         aria-label="Hapus stiker"
-                        className="flex min-h-[42px] min-w-[42px] items-center justify-center rounded-xl bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 tap-bounce shadow-2xs cursor-pointer"
+                        className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 tap-bounce shadow-2xs cursor-pointer"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -559,7 +559,7 @@ export function CanvasCustomizerScreen({
                             sounds.playClick();
                             setSelectedFrameColor(fc.hex);
                           }}
-                          className={`flex items-center gap-1.5 p-2 rounded-xl border text-[11px] font-semibold min-h-[40px] tap-bounce cursor-pointer ${
+                          className={`flex items-center gap-1.5 p-2 rounded-xl border text-[11px] font-semibold min-h-[44px] min-w-[44px] tap-bounce cursor-pointer ${
                             selectedFrameColor === fc.hex
                               ? "border-[#1d1d1f] bg-white ring-1 ring-zinc-900"
                               : "border-zinc-200 bg-white hover:bg-zinc-50"

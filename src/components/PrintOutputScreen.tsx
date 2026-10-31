@@ -190,16 +190,16 @@ export function PrintOutputScreen({
               </div>
 
               {qrCodeDataUrl ? (
-                <div className="mb-2 rounded-xl bg-white p-2.5 border border-zinc-200 shadow-xs">
+                <div className="mb-2 w-36 h-36 aspect-square flex items-center justify-center rounded-xl bg-white p-2.5 border border-zinc-200 shadow-xs">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={qrCodeDataUrl}
                     alt="QR Softfile"
-                    className="h-32 w-32 md:h-36 md:w-36 object-contain"
+                    className="w-full h-full object-contain"
                   />
                 </div>
               ) : (
-                <div className="h-32 w-32 md:h-36 md:w-36 flex items-center justify-center text-xs text-zinc-400 font-semibold">
+                <div className="mb-2 w-36 h-36 aspect-square flex items-center justify-center rounded-xl bg-white p-2.5 border border-zinc-200 shadow-xs text-xs text-zinc-400 font-semibold">
                   Membuat QR...
                 </div>
               )}

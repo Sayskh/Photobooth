@@ -1,7 +1,22 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAdminAuth } from "@/lib/adminAuth";
+import { z } from "zod";
 
-export async function GET() {
+const boothSettingsSchema = z.object({
+  name: z.string().trim().min(1).max(100).optional(),
+  storeName: z.string().trim().min(1).max(100).optional(),
+  price: z.coerce.number().int().min(0).max(1000000).optional(),
+  includedPrints: z.coerce.number().int().min(1).max(10).optional(),
+  sessionTimeout: z.coerce.number().int().min(60).max(3600).optional(),
+  watermarkText: z.string().trim().max(100).optional(),
+  cameraDeviceId: z.string().trim().max(255).nullable().optional(),
+});
+
+export async function GET(req: Request) {
+  const unauth = await requireAdminAuth(req);
+  if (unauth) return unauth;
+
   try {
     let booth = await prisma.booth.findFirst();
     if (!booth) {
@@ -32,7 +47,24 @@ export async function GET() {
 }
 
 export async function PATCH(req: Request) {
+  const unauth = await requireAdminAuth(req);
+  if (unauth) return unauth;
+
   try {
+    const rawBody = await req.json().catch(() => ({}));
+    const parseResult = boothSettingsSchema.safeParse(rawBody);
+
+    if (!parseResult.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Format pengaturan bilik tidak valid.",
+          errors: parseResult.error.flatten().fieldErrors,
+        },
+        { status: 400 }
+      );
+    }
+
     const {
       name,
       storeName,
@@ -41,7 +73,7 @@ export async function PATCH(req: Request) {
       sessionTimeout,
       watermarkText,
       cameraDeviceId,
-    } = await req.json();
+    } = parseResult.data;
 
     let booth = await prisma.booth.findFirst();
     if (!booth) {
@@ -49,9 +81,9 @@ export async function PATCH(req: Request) {
         data: {
           name: name || "Booth Kiosk 1",
           storeName: storeName || "KioskSnap Studio",
-          price: Number(price) || 30000,
-          includedPrints: Number(includedPrints) || 2,
-          sessionTimeout: Number(sessionTimeout) || 480,
+          price: price !== undefined ? price : 30000,
+          includedPrints: includedPrints !== undefined ? includedPrints : 2,
+          sessionTimeout: sessionTimeout !== undefined ? sessionTimeout : 480,
           watermarkText: watermarkText || "KioskSnap • Photobooth",
           cameraDeviceId: cameraDeviceId || null,
         },
@@ -62,9 +94,9 @@ export async function PATCH(req: Request) {
         data: {
           ...(name !== undefined && { name }),
           ...(storeName !== undefined && { storeName }),
-          ...(price !== undefined && { price: Number(price) }),
-          ...(includedPrints !== undefined && { includedPrints: Number(includedPrints) }),
-          ...(sessionTimeout !== undefined && { sessionTimeout: Number(sessionTimeout) }),
+          ...(price !== undefined && { price }),
+          ...(includedPrints !== undefined && { includedPrints }),
+          ...(sessionTimeout !== undefined && { sessionTimeout }),
           ...(watermarkText !== undefined && { watermarkText }),
           ...(cameraDeviceId !== undefined && { cameraDeviceId }),
         },

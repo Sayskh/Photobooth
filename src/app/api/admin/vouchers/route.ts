@@ -1,12 +1,21 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAdminAuth } from "@/lib/adminAuth";
+import { z } from "zod";
+
+const createVoucherSchema = z.object({
+  amount: z.coerce.number().int().min(1000).max(1000000).optional(),
+});
 
 function generateVoucherCode(): string {
   const randomNum = Math.floor(1000 + Math.random() * 9000);
   return `KS-${randomNum}`;
 }
 
-export async function GET() {
+export async function GET(req: Request) {
+  const unauth = await requireAdminAuth(req);
+  if (unauth) return unauth;
+
   try {
     const vouchers = await prisma.voucher.findMany({
       orderBy: { createdAt: "desc" },
@@ -32,11 +41,27 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  const unauth = await requireAdminAuth(req);
+  if (unauth) return unauth;
+
   try {
-    const body = await req.json().catch(() => ({}));
+    const rawBody = await req.json().catch(() => ({}));
+    const parseResult = createVoucherSchema.safeParse(rawBody);
+
+    if (!parseResult.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Data voucher tidak valid.",
+          errors: parseResult.error.flatten().fieldErrors,
+        },
+        { status: 400 }
+      );
+    }
+
     const booth = await prisma.booth.findFirst();
     const defaultAmount = booth?.price || 30000;
-    const amount = Number(body.amount) || defaultAmount;
+    const amount = parseResult.data.amount || defaultAmount;
 
     let admin = await prisma.adminUser.findFirst();
     if (!admin) {

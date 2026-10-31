@@ -108,7 +108,7 @@ export function AttractScreen({ onStart, onOpenAdmin }: AttractScreenProps) {
             <Printer className="h-4.5 w-4.5" />
           </div>
           <span className="text-xs font-bold text-zinc-900">2 Strip Cetak Fisik</span>
-          <span className="text-[11px] text-zinc-500 mt-0.5">Format 4R twin strip instan</span>
+          <span className="text-[11px] text-zinc-600 mt-0.5">Format 4R twin strip instan</span>
         </div>
 
         <div className="flex flex-col items-center rounded-2xl bg-white p-4 border border-zinc-200/80 shadow-xs">
@@ -116,7 +116,7 @@ export function AttractScreen({ onStart, onOpenAdmin }: AttractScreenProps) {
             <RefreshCw className="h-4.5 w-4.5" />
           </div>
           <span className="text-xs font-bold text-zinc-900">Bebas Foto Ulang</span>
-          <span className="text-[11px] text-zinc-500 mt-0.5">Ulang pose bila belum pas</span>
+          <span className="text-[11px] text-zinc-600 mt-0.5">Ulang pose bila belum pas</span>
         </div>
 
         <div className="flex flex-col items-center rounded-2xl bg-white p-4 border border-zinc-200/80 shadow-xs">
@@ -124,7 +124,7 @@ export function AttractScreen({ onStart, onOpenAdmin }: AttractScreenProps) {
             <Smartphone className="h-4.5 w-4.5" />
           </div>
           <span className="text-xs font-bold text-zinc-900">Live Photo & Video</span>
-          <span className="text-[11px] text-zinc-500 mt-0.5">Scan QR ke galeri ponsel</span>
+          <span className="text-[11px] text-zinc-600 mt-0.5">Scan QR ke galeri ponsel</span>
         </div>
       </div>
     </div>

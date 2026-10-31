@@ -37,6 +37,7 @@ export function CameraCaptureScreen({
   const [countdown, setCountdown] = useState<number | null>(null);
   const [isFlashing, setIsFlashing] = useState<boolean>(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
+  const [retryTrigger, setRetryTrigger] = useState<number>(0);
 
   const currentPose = capturedPhotos.length + 1;
 
@@ -44,6 +45,7 @@ export function CameraCaptureScreen({
     let mounted = true;
 
     async function startCamera() {
+      setCameraError(null);
       try {
         const videoConstraints: MediaTrackConstraints = {
           width: { ideal: 1920 },
@@ -82,7 +84,7 @@ export function CameraCaptureScreen({
         streamRef.current = null;
       }
     };
-  }, [cameraDeviceId]);
+  }, [cameraDeviceId, retryTrigger]);
 
   // Capture frame to base64
   const captureFrame = (): string => {
@@ -267,6 +269,17 @@ export function CameraCaptureScreen({
             <div className="flex flex-col items-center gap-3 p-6 text-center text-red-300">
               <AlertTriangle className="h-10 w-10 text-red-400" />
               <p className="max-w-md font-medium text-white text-sm">{cameraError}</p>
+              <button
+                type="button"
+                onClick={() => {
+                  sounds.playClick();
+                  setRetryTrigger((prev) => prev + 1);
+                }}
+                className="mt-2 flex min-h-[44px] items-center gap-2 rounded-xl bg-white px-5 py-2 text-xs font-semibold text-zinc-900 shadow-sm tap-bounce hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 cursor-pointer"
+              >
+                <RotateCcw className="h-4 w-4 text-zinc-900" />
+                <span>Coba Hubungkan Ulang Kamera</span>
+              </button>
             </div>
           ) : (
             <video
@@ -335,7 +348,7 @@ export function CameraCaptureScreen({
                 setLiveVideos((prev) => prev.slice(0, -1));
                 setReviewingPhoto(null);
               }}
-              className="flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-white px-5 text-xs font-semibold text-zinc-700 border border-zinc-200 shadow-xs tap-bounce hover:bg-zinc-50 cursor-pointer"
+              className="flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-white px-5 text-xs font-semibold text-zinc-700 border border-zinc-200 shadow-xs tap-bounce hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 cursor-pointer"
             >
               <RotateCcw className="h-4 w-4 text-zinc-600" />
               <span>Ulangi Pose {capturedPhotos.length}</span>
@@ -351,7 +364,7 @@ export function CameraCaptureScreen({
                   onAllPhotosCaptured(capturedPhotos, liveVideos);
                 }
               }}
-              className="flex min-h-[48px] flex-1 max-w-md items-center justify-center gap-2 rounded-xl bg-[#1d1d1f] text-xs font-semibold text-white shadow-xs tap-bounce hover:bg-black cursor-pointer"
+              className="flex min-h-[48px] flex-1 max-w-md items-center justify-center gap-2 rounded-xl bg-[#1d1d1f] text-xs font-semibold text-white shadow-xs tap-bounce hover:bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 cursor-pointer"
             >
               <CheckCircle2 className="h-4 w-4" />
               <span>

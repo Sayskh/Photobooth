@@ -205,7 +205,7 @@ export function FrameSelectScreen({
   };
 
   return (
-    <div className="relative flex h-screen w-screen flex-col justify-between studio-bg p-4 md:p-5 select-none font-sans overflow-hidden text-zinc-900">
+    <div className="relative flex min-h-dvh flex-col justify-between studio-bg p-4 md:p-5 select-none font-sans overflow-y-auto no-scrollbar text-zinc-900">
       {/* Top Bar Header */}
       <div className="flex items-center justify-between border-b border-zinc-200/80 pb-2.5">
         <button
@@ -221,7 +221,7 @@ export function FrameSelectScreen({
         </button>
 
         <div className="text-center">
-          <span className="text-[10px] font-mono font-bold tracking-widest text-zinc-500 uppercase block">
+          <span className="text-[10px] font-mono font-bold tracking-widest text-zinc-600 uppercase block">
             Langkah 1 dari 3 • Konfigurasi Format
           </span>
           <h2 className="text-base md:text-lg font-bold tracking-tight text-zinc-900 mt-0.5">
@@ -462,7 +462,7 @@ export function FrameSelectScreen({
                         <span className="text-xs font-bold text-zinc-900 block truncate">
                           {theme.name}
                         </span>
-                        <span className="text-[10px] text-zinc-500 truncate block font-normal">
+                        <span className="text-[10px] text-zinc-600 truncate block font-normal">
                           {theme.tagline}
                         </span>
                       </div>
@@ -496,7 +496,7 @@ export function FrameSelectScreen({
                         <span className="text-xs font-bold text-zinc-900 block">
                           {col.name}
                         </span>
-                        <span className="text-[10px] font-mono text-zinc-500">
+                        <span className="text-[10px] font-mono text-zinc-600">
                           {col.hex}
                         </span>
                       </div>
@@ -517,7 +517,7 @@ export function FrameSelectScreen({
               <span>Mulai Sesi Foto ({currentTemplate.slotsCount} Pose)</span>
               <ChevronRight className="h-5 w-5" />
             </button>
-            <p className="text-center text-[11px] text-zinc-500 font-normal mt-1">
+            <p className="text-center text-[11px] text-zinc-600 font-normal mt-1">
               {currentTemplate.subHeadline}
             </p>
           </div>

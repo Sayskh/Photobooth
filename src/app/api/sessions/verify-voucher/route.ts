@@ -1,18 +1,44 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
+import { z } from "zod";
+
+const verifyVoucherSchema = z.object({
+  code: z.string().trim().min(1, "Kode voucher wajib diisi.").max(30),
+});
 
 export async function POST(req: Request) {
   try {
-    const { code } = await req.json();
+    // Rate limit: 10 requests per minute (60,000 ms) per IP
+    const clientIp = getClientIp(req);
+    const limit = checkRateLimit(`verify-voucher:${clientIp}`, 10, 60 * 1000);
 
-    if (!code || typeof code !== "string") {
+    if (!limit.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: `Terlalu banyak percobaan verifikasi. Coba lagi dalam ${limit.retryAfterSec} detik.`,
+        },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(limit.retryAfterSec),
+          },
+        }
+      );
+    }
+
+    const rawBody = await req.json().catch(() => ({}));
+    const parseResult = verifyVoucherSchema.safeParse(rawBody);
+
+    if (!parseResult.success) {
       return NextResponse.json(
         { success: false, message: "Kode voucher tidak valid." },
         { status: 400 }
       );
     }
 
-    const cleanCode = code.trim().toUpperCase();
+    const cleanCode = parseResult.data.code.toUpperCase();
     const voucher = await prisma.voucher.findUnique({
       where: { code: cleanCode },
     });

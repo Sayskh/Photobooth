@@ -233,7 +233,7 @@ export default function DownloadPage() {
                     onClick={() =>
                       handleDownload(strips.strip1, `KioskSnap-Strip-1-${token.slice(0, 6)}.png`)
                     }
-                    className="flex min-h-[42px] w-full items-center justify-center gap-1.5 rounded-lg bg-[#1d1d1f] text-xs font-semibold text-white shadow-xs tap-bounce hover:bg-black cursor-pointer"
+                    className="flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-lg bg-[#1d1d1f] text-xs font-semibold text-white shadow-xs tap-bounce hover:bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 cursor-pointer"
                   >
                     <Download className="h-3.5 w-3.5" />
                     <span>Unduh Strip 1</span>
@@ -255,7 +255,7 @@ export default function DownloadPage() {
                     onClick={() =>
                       handleDownload(strips.strip2, `KioskSnap-Strip-2-${token.slice(0, 6)}.png`)
                     }
-                    className="flex min-h-[42px] w-full items-center justify-center gap-1.5 rounded-lg bg-[#1d1d1f] text-xs font-semibold text-white shadow-xs tap-bounce hover:bg-black cursor-pointer"
+                    className="flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-lg bg-[#1d1d1f] text-xs font-semibold text-white shadow-xs tap-bounce hover:bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 cursor-pointer"
                   >
                     <Download className="h-3.5 w-3.5" />
                     <span>Unduh Strip 2</span>
@@ -408,7 +408,7 @@ export default function DownloadPage() {
                             `KioskSnap-Pose-${s.poseIndex}-${token.slice(0, 6)}.jpg`
                           )
                         }
-                        className="flex min-h-[38px] w-full items-center justify-center gap-1.5 rounded-lg bg-white text-[11px] font-semibold text-zinc-800 border border-zinc-200 transition tap-bounce hover:bg-zinc-100 shadow-2xs"
+                        className="flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-lg bg-white text-[11px] font-semibold text-zinc-800 border border-zinc-200 transition tap-bounce hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 shadow-2xs cursor-pointer"
                       >
                         <Download className="h-3 w-3 text-zinc-700" />
                         <span>Foto Pose {s.poseIndex}</span>
@@ -423,7 +423,7 @@ export default function DownloadPage() {
                               `KioskSnap-Live-Pose-${s.poseIndex}-${token.slice(0, 6)}.mp4`
                             )
                           }
-                          className="flex min-h-[38px] w-full items-center justify-center gap-1.5 rounded-lg bg-zinc-100 text-[11px] font-semibold text-zinc-800 border border-zinc-200 transition tap-bounce hover:bg-zinc-200 shadow-2xs"
+                          className="flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-lg bg-zinc-100 text-[11px] font-semibold text-zinc-800 border border-zinc-200 transition tap-bounce hover:bg-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 shadow-2xs cursor-pointer"
                         >
                           <Video className="h-3 w-3 text-zinc-700" />
                           <span>Video Pose {s.poseIndex}</span>
