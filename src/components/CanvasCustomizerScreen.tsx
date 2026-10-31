@@ -36,20 +36,35 @@ const STICKER_LIST = [
 ];
 
 const THEME_OPTIONS = [
+  { id: "CLASSIC", name: "Studio Minimal", desc: "Border bersih warna solid" },
   { id: "THEATER_TICKET", name: "Archive Ticket", desc: "Vintage tiket bioskop & barcode" },
-  { id: "CLASSIC", name: "Studio Minimal", desc: "Frame border bersih warna solid" },
-  { id: "Y2K_CHECKER", name: "Y2K Street", desc: "Motif catur, starburst & retro eyes" },
-  { id: "GREEN_CAFE", name: "Seoul Cafe", desc: "Vintage diner receipt & badges" },
-  { id: "POP_YELLOW", name: "Rad Pop Yellow", desc: "High-contrast bold doodle pop" },
+  { id: "Y2K_CHECKER", name: "Y2K Street", desc: "Checkerboard retro starburst" },
+  { id: "GREEN_CAFE", name: "Seoul Cafe", desc: "Retro diner guest check" },
+  { id: "POP_YELLOW", name: "Rad Yellow", desc: "Bold high-contrast pop" },
+  { id: "FILM_NOIR", name: "Film Noir", desc: "Gritty monokrom sinematik" },
+  { id: "CHERRY_BLOSSOM", name: "Cherry Blossom", desc: "Pastel Japanese sakura" },
+  { id: "CYBER_NEON", name: "Cyber Neon", desc: "Futuristik glow malam" },
+  { id: "RETRO_COMIC", name: "Retro Comic", desc: "Halftone pop art bergaya" },
+  { id: "SUNSET_WARM", name: "Sunset Gradient", desc: "Hangat keemasan senja" },
+  { id: "OCEAN_BREEZE", name: "Ocean Breeze", desc: "Biru laut tenang" },
+  { id: "FOREST_MOSS", name: "Forest Moss", desc: "Hijau hutan organik" },
 ];
 
 const FRAME_COLORS = [
-  { name: "Putih", hex: "#FFFFFF" },
-  { name: "Hitam", hex: "#18181B" },
-  { name: "Krem", hex: "#FEF3C7" },
-  { name: "Soft Pink", hex: "#FCE7F3" },
-  { name: "Lavender", hex: "#EDE9FE" },
-  { name: "Sage Mint", hex: "#D1FAE5" },
+  { name: "Cloud White", hex: "#FFFFFF" },
+  { name: "Onyx Black", hex: "#18181B" },
+  { name: "Buttercream", hex: "#FEF3C7" },
+  { name: "Sakura Pink", hex: "#FCE7F3" },
+  { name: "Lavender Mist", hex: "#EDE9FE" },
+  { name: "Matcha Sage", hex: "#D1FAE5" },
+  { name: "Terracotta", hex: "#FDBA74" },
+  { name: "Denim Blue", hex: "#BFDBFE" },
+  { name: "Mocha", hex: "#D6D3D1" },
+  { name: "Lilac", hex: "#E9D5FF" },
+  { name: "Olive", hex: "#D9F99D" },
+  { name: "Crimson", hex: "#FECACA" },
+  { name: "Teal", hex: "#CCFBF1" },
+  { name: "Slate", hex: "#CBD5E1" },
 ];
 
 const FILTERS = [
@@ -215,9 +230,9 @@ export function CanvasCustomizerScreen({
   const timeFormatted = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
 
   return (
-    <div className="relative flex h-screen w-screen flex-col justify-between bg-zinc-100 p-5 select-none overflow-hidden font-sans text-zinc-900">
+    <div className="relative flex h-screen w-screen flex-col justify-between studio-bg p-4 md:p-5 select-none overflow-hidden font-sans text-zinc-900">
       {/* Top Header Bar */}
-      <div className="flex items-center justify-between border-b border-zinc-200/90 pb-3">
+      <div className="flex items-center justify-between border-b border-zinc-200/80 pb-3">
         <div className="flex items-center gap-3">
           <button
             type="button"
@@ -225,9 +240,9 @@ export function CanvasCustomizerScreen({
               sounds.playClick();
               onRetakePhotos();
             }}
-            className="flex min-h-[46px] items-center gap-2 rounded-xl bg-white px-4 py-2 font-bold text-zinc-700 border border-zinc-200 hover:bg-zinc-50 active:scale-95 text-xs shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 cursor-pointer"
+            className="flex min-h-[44px] items-center gap-2 rounded-xl bg-white px-4 py-2 font-semibold text-zinc-700 border border-zinc-200 hover:bg-zinc-50 tap-bounce text-xs shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 cursor-pointer"
           >
-            <RotateCcw className="h-3.5 w-3.5" />
+            <RotateCcw className="h-3.5 w-3.5 text-zinc-700" />
             <span>Foto Ulang (Retake)</span>
           </button>
 
@@ -243,13 +258,13 @@ export function CanvasCustomizerScreen({
 
         {/* Global Session Timer */}
         <div
-          className={`flex items-center gap-2 rounded-lg px-3.5 py-1.5 font-mono text-xs font-bold border transition ${
+          className={`flex items-center gap-2 rounded-xl px-3.5 py-1.5 font-mono text-xs font-semibold border transition ${
             sessionSecondsLeft <= 60
-              ? "bg-red-50 text-red-700 border-red-200"
-              : "bg-white text-zinc-800 border-zinc-200 shadow-2xs"
+              ? "bg-red-50 text-red-700 border-red-200 animate-pulse"
+              : "bg-zinc-100 text-zinc-800 border-zinc-200"
           }`}
         >
-          <Clock className={`h-3.5 w-3.5 ${sessionSecondsLeft <= 60 ? "text-red-600" : "text-zinc-600"}`} />
+          <Clock className={`h-3.5 w-3.5 ${sessionSecondsLeft <= 60 ? "text-red-500" : "text-zinc-600"}`} />
           <span>Sisa Waktu: {timeFormatted}</span>
         </div>
       </div>
@@ -257,13 +272,13 @@ export function CanvasCustomizerScreen({
       {/* Main Touch Interaction Stage */}
       <div className="flex flex-1 items-center justify-center gap-6 py-2 overflow-hidden max-w-6xl w-full mx-auto">
         {/* LEFT COLUMN: Physical Paper Printout Preview Stage */}
-        <div className="flex flex-1 h-full max-h-[76vh] flex-col items-center justify-center rounded-2xl bg-zinc-200/60 p-4 border border-zinc-300/80 shadow-inner overflow-hidden">
+        <div className="flex flex-1 h-full max-h-[76vh] flex-col items-center justify-center rounded-2xl bg-white p-4 border border-zinc-200/80 shadow-xs overflow-hidden">
           <div className="w-full flex items-center justify-between text-xs font-mono text-zinc-600 mb-2 px-2">
             <span className="font-bold text-zinc-800 uppercase">
               Pratinjau Lembar Cetak 4R Vertikal (2 Strip Fisik)
             </span>
             {selectedStickerId && (
-              <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+              <span className="text-[11px] font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-lg border border-emerald-200">
                 Mode Geser: Sentuh area foto untuk memindahkan stiker
               </span>
             )}
@@ -272,17 +287,17 @@ export function CanvasCustomizerScreen({
           <div
             ref={previewContainerRef}
             onClick={handlePreviewTouch}
-            className="relative flex flex-1 items-center justify-center w-full overflow-hidden cursor-crosshair rounded-xl bg-white/70 p-2 border border-zinc-200 shadow-sm"
+            className="relative flex flex-1 items-center justify-center w-full overflow-hidden cursor-crosshair rounded-xl bg-zinc-100 p-2 border border-zinc-200 shadow-inner"
           >
             {previewImage ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={previewImage}
                 alt="Pratinjau Foto Siap Cetak"
-                className="max-h-full max-w-full rounded-md object-contain shadow-xl border border-zinc-300"
+                className="max-h-full max-w-full rounded-lg object-contain shadow-md border border-zinc-300"
               />
             ) : (
-              <div className="flex items-center gap-2 text-zinc-600 font-medium text-xs">
+              <div className="flex items-center gap-2 text-zinc-600 font-semibold text-xs">
                 <span>Menyusun foto...</span>
               </div>
             )}
@@ -290,19 +305,19 @@ export function CanvasCustomizerScreen({
         </div>
 
         {/* RIGHT COLUMN: Touch Friendly Customizer Panel */}
-        <div className="flex h-full max-h-[76vh] w-96 flex-col justify-between rounded-2xl bg-white p-5 border border-zinc-200/90 shadow-sm">
+        <div className="flex h-full max-h-[76vh] w-96 flex-col justify-between rounded-2xl bg-white p-5 border border-zinc-200/80 shadow-xs">
           <div>
             {/* Tool Category Tabs */}
-            <div className="flex gap-1 rounded-xl bg-zinc-100 p-1 border border-zinc-200 mb-3">
+            <div className="flex gap-1 rounded-xl bg-zinc-200/80 p-1 border border-zinc-200 mb-3">
               <button
                 type="button"
                 onClick={() => {
                   sounds.playClick();
                   setActiveTab("FILTER");
                 }}
-                className={`flex-1 flex min-h-[46px] items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-bold transition focus-visible:outline-none cursor-pointer ${
+                className={`flex-1 flex min-h-[42px] items-center justify-center gap-1.5 rounded-lg py-1.5 text-xs font-semibold transition focus-visible:outline-none cursor-pointer ${
                   activeTab === "FILTER"
-                    ? "bg-white text-zinc-900 shadow-2xs"
+                    ? "bg-white text-zinc-900 shadow-xs"
                     : "text-zinc-600 hover:text-zinc-900"
                 }`}
               >
@@ -316,9 +331,9 @@ export function CanvasCustomizerScreen({
                   sounds.playClick();
                   setActiveTab("STICKERS");
                 }}
-                className={`flex-1 flex min-h-[46px] items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-bold transition focus-visible:outline-none cursor-pointer ${
+                className={`flex-1 flex min-h-[42px] items-center justify-center gap-1.5 rounded-lg py-1.5 text-xs font-semibold transition focus-visible:outline-none cursor-pointer ${
                   activeTab === "STICKERS"
-                    ? "bg-white text-zinc-900 shadow-2xs"
+                    ? "bg-white text-zinc-900 shadow-xs"
                     : "text-zinc-600 hover:text-zinc-900"
                 }`}
               >
@@ -332,9 +347,9 @@ export function CanvasCustomizerScreen({
                   sounds.playClick();
                   setActiveTab("THEME");
                 }}
-                className={`flex-1 flex min-h-[46px] items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-bold transition focus-visible:outline-none cursor-pointer ${
+                className={`flex-1 flex min-h-[42px] items-center justify-center gap-1.5 rounded-lg py-1.5 text-xs font-semibold transition focus-visible:outline-none cursor-pointer ${
                   activeTab === "THEME"
-                    ? "bg-white text-zinc-900 shadow-2xs"
+                    ? "bg-white text-zinc-900 shadow-xs"
                     : "text-zinc-600 hover:text-zinc-900"
                 }`}
               >
@@ -360,21 +375,21 @@ export function CanvasCustomizerScreen({
                           sounds.playClick();
                           setSelectedFilter(f.id);
                         }}
-                        className={`flex min-h-[52px] items-center justify-between rounded-xl p-3 border transition active:scale-95 cursor-pointer ${
+                        className={`flex min-h-[50px] items-center justify-between rounded-xl p-3 border transition tap-bounce cursor-pointer ${
                           isSelected
-                            ? "bg-zinc-900 text-white border-zinc-900 shadow-sm ring-2 ring-zinc-900"
-                            : "bg-zinc-50 border-zinc-200 text-zinc-800 hover:bg-zinc-100"
+                            ? "bg-white text-zinc-900 border-[#1d1d1f] shadow-xs ring-2 ring-zinc-900"
+                            : "bg-white border-zinc-200 text-zinc-800 hover:bg-zinc-50"
                         }`}
                       >
                         <div className="flex items-center gap-3">
                           <div
-                            className={`h-7 w-7 rounded-lg bg-gradient-to-br ${f.previewGradient} border shadow-2xs shrink-0`}
+                            className={`h-7 w-7 rounded-lg bg-gradient-to-br ${f.previewGradient} border border-black/10 shadow-2xs shrink-0`}
                           />
                           <div className="text-left">
                             <span className="text-xs font-bold block">{f.name}</span>
                             <span
-                              className={`text-[10px] block ${
-                                isSelected ? "text-zinc-300" : "text-zinc-500"
+                              className={`text-[10px] font-normal block ${
+                                isSelected ? "text-zinc-800" : "text-zinc-500"
                               }`}
                             >
                               {f.tag}
@@ -383,7 +398,7 @@ export function CanvasCustomizerScreen({
                         </div>
 
                         {isSelected && (
-                          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-white text-zinc-900">
+                          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#1d1d1f] text-white shadow-xs">
                             <CheckCircle2 className="h-3.5 w-3.5" />
                           </div>
                         )}
@@ -401,8 +416,8 @@ export function CanvasCustomizerScreen({
                   <span className="text-xs font-bold text-zinc-800 uppercase tracking-wider">
                     Pilih Stiker Dekorasi:
                   </span>
-                  <div className="flex gap-1.5 text-[10px] font-bold text-zinc-600">
-                    <span className="bg-zinc-100 px-2 py-0.5 rounded border border-zinc-200">
+                  <div className="flex gap-1.5 text-[10px] font-medium text-zinc-600">
+                    <span className="bg-zinc-100 px-2 py-0.5 rounded-md border border-zinc-200">
                       Ketuk stiker untuk pasang
                     </span>
                   </div>
@@ -418,8 +433,8 @@ export function CanvasCustomizerScreen({
                         setActiveEmoji(emoji);
                         handleAddSticker(emoji, 50, 45);
                       }}
-                      className={`flex min-h-[48px] items-center justify-center rounded-xl bg-white border text-2xl hover:bg-zinc-100 active:scale-90 shadow-2xs transition focus-visible:outline-none cursor-pointer ${
-                        activeEmoji === emoji ? "border-zinc-900 ring-2 ring-zinc-900" : "border-zinc-200"
+                      className={`flex min-h-[48px] items-center justify-center rounded-xl bg-white border text-2xl hover:bg-zinc-100 tap-bounce shadow-2xs transition focus-visible:outline-none cursor-pointer ${
+                        activeEmoji === emoji ? "border-[#1d1d1f] ring-2 ring-zinc-900" : "border-zinc-200"
                       }`}
                       aria-label={`Pilih stiker ${emoji}`}
                     >
@@ -433,14 +448,14 @@ export function CanvasCustomizerScreen({
                   <button
                     type="button"
                     onClick={() => handleAddSticker(activeEmoji, 25, 40)}
-                    className="flex-1 flex min-h-[40px] items-center justify-center gap-1 text-[11px] font-bold text-zinc-800 bg-zinc-100 hover:bg-zinc-200 rounded-lg border border-zinc-200 transition active:scale-95 cursor-pointer"
+                    className="flex-1 flex min-h-[40px] items-center justify-center gap-1 text-[11px] font-semibold text-zinc-800 bg-zinc-100 hover:bg-zinc-200 rounded-xl border border-zinc-200 transition tap-bounce cursor-pointer"
                   >
                     <span>Pasang di Strip 1 (Kiri)</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => handleAddSticker(activeEmoji, 75, 40)}
-                    className="flex-1 flex min-h-[40px] items-center justify-center gap-1 text-[11px] font-bold text-zinc-800 bg-zinc-100 hover:bg-zinc-200 rounded-lg border border-zinc-200 transition active:scale-95 cursor-pointer"
+                    className="flex-1 flex min-h-[40px] items-center justify-center gap-1 text-[11px] font-semibold text-zinc-800 bg-zinc-100 hover:bg-zinc-200 rounded-xl border border-zinc-200 transition tap-bounce cursor-pointer"
                   >
                     <span>Pasang di Strip 2 (Kanan)</span>
                   </button>
@@ -448,13 +463,13 @@ export function CanvasCustomizerScreen({
 
                 {/* Active Sticker Manipulator Bar */}
                 {selectedStickerId && (
-                  <div className="rounded-xl bg-zinc-100 p-2.5 border border-zinc-300">
+                  <div className="rounded-xl bg-zinc-50 p-3 border border-zinc-200">
                     <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-[11px] font-bold text-zinc-800 flex items-center gap-1">
+                      <span className="text-[11px] font-semibold text-zinc-900 flex items-center gap-1">
                         <Move className="h-3 w-3 text-zinc-600" />
                         <span>Atur Ukuran & Rotasi:</span>
                       </span>
-                      <span className="text-[10px] text-zinc-500 font-medium">
+                      <span className="text-[10px] text-zinc-500 font-normal">
                         Sentuh foto untuk geser
                       </span>
                     </div>
@@ -464,9 +479,9 @@ export function CanvasCustomizerScreen({
                         type="button"
                         onClick={handleRotateSticker}
                         aria-label="Putar stiker"
-                        className="flex min-h-[44px] flex-1 items-center justify-center gap-1 rounded-lg bg-white border border-zinc-300 text-xs font-bold text-zinc-800 hover:bg-zinc-50 active:scale-95 shadow-2xs cursor-pointer"
+                        className="flex min-h-[42px] flex-1 items-center justify-center gap-1 rounded-xl bg-white border border-zinc-200 text-xs font-semibold text-zinc-800 hover:bg-zinc-100 tap-bounce shadow-2xs cursor-pointer"
                       >
-                        <RotateCw className="h-3.5 w-3.5" />
+                        <RotateCw className="h-3.5 w-3.5 text-zinc-700" />
                         <span>Putar</span>
                       </button>
 
@@ -474,9 +489,9 @@ export function CanvasCustomizerScreen({
                         type="button"
                         onClick={() => handleScaleSticker(0.2)}
                         aria-label="Perbesar stiker"
-                        className="flex min-h-[44px] flex-1 items-center justify-center gap-1 rounded-lg bg-white border border-zinc-300 text-xs font-bold text-zinc-800 hover:bg-zinc-50 active:scale-95 shadow-2xs cursor-pointer"
+                        className="flex min-h-[42px] flex-1 items-center justify-center gap-1 rounded-xl bg-white border border-zinc-200 text-xs font-semibold text-zinc-800 hover:bg-zinc-100 tap-bounce shadow-2xs cursor-pointer"
                       >
-                        <Plus className="h-3.5 w-3.5" />
+                        <Plus className="h-3.5 w-3.5 text-zinc-700" />
                         <span>Besar</span>
                       </button>
 
@@ -484,9 +499,9 @@ export function CanvasCustomizerScreen({
                         type="button"
                         onClick={() => handleScaleSticker(-0.2)}
                         aria-label="Perkecil stiker"
-                        className="flex min-h-[44px] flex-1 items-center justify-center gap-1 rounded-lg bg-white border border-zinc-300 text-xs font-bold text-zinc-800 hover:bg-zinc-50 active:scale-95 shadow-2xs cursor-pointer"
+                        className="flex min-h-[42px] flex-1 items-center justify-center gap-1 rounded-xl bg-white border border-zinc-200 text-xs font-semibold text-zinc-800 hover:bg-zinc-100 tap-bounce shadow-2xs cursor-pointer"
                       >
-                        <Minus className="h-3.5 w-3.5" />
+                        <Minus className="h-3.5 w-3.5 text-zinc-700" />
                         <span>Kecil</span>
                       </button>
 
@@ -494,7 +509,7 @@ export function CanvasCustomizerScreen({
                         type="button"
                         onClick={handleDeleteSticker}
                         aria-label="Hapus stiker"
-                        className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 active:scale-95 shadow-2xs cursor-pointer"
+                        className="flex min-h-[42px] min-w-[42px] items-center justify-center rounded-xl bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 tap-bounce shadow-2xs cursor-pointer"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -518,21 +533,21 @@ export function CanvasCustomizerScreen({
                       sounds.playClick();
                       setSelectedTheme(t.id);
                     }}
-                    className={`flex flex-col w-full text-left p-2.5 rounded-xl border transition min-h-[50px] cursor-pointer ${
+                    className={`flex flex-col w-full text-left p-2.5 rounded-xl border transition min-h-[50px] tap-bounce cursor-pointer ${
                       selectedTheme === t.id
-                        ? "border-zinc-900 bg-zinc-50 shadow-2xs ring-2 ring-zinc-900"
+                        ? "border-[#1d1d1f] bg-white ring-2 ring-zinc-900 shadow-xs"
                         : "border-zinc-200 bg-white hover:bg-zinc-50"
                     }`}
                   >
                     <span className="text-xs font-bold text-zinc-900">{t.name}</span>
-                    <span className="text-[10px] text-zinc-500 mt-0.5">{t.desc}</span>
+                    <span className="text-[10px] text-zinc-500 mt-0.5 font-normal">{t.desc}</span>
                   </button>
                 ))}
 
                 {/* Color swatches for CLASSIC theme */}
                 {selectedTheme === "CLASSIC" && (
                   <div className="pt-2 border-t border-zinc-200 mt-2">
-                    <span className="text-[11px] font-bold text-zinc-700 mb-2 block">
+                    <span className="text-[11px] font-semibold text-zinc-700 mb-2 block">
                       Pilihan Warna Solid Frame:
                     </span>
                     <div className="grid grid-cols-3 gap-1.5">
@@ -544,10 +559,10 @@ export function CanvasCustomizerScreen({
                             sounds.playClick();
                             setSelectedFrameColor(fc.hex);
                           }}
-                          className={`flex items-center gap-1.5 p-2 rounded-lg border text-[11px] font-semibold min-h-[42px] cursor-pointer ${
+                          className={`flex items-center gap-1.5 p-2 rounded-xl border text-[11px] font-semibold min-h-[40px] tap-bounce cursor-pointer ${
                             selectedFrameColor === fc.hex
-                              ? "border-zinc-900 bg-zinc-100 ring-1 ring-zinc-900"
-                              : "border-zinc-200 bg-white"
+                              ? "border-[#1d1d1f] bg-white ring-1 ring-zinc-900"
+                              : "border-zinc-200 bg-white hover:bg-zinc-50"
                           }`}
                         >
                           <div
@@ -570,13 +585,13 @@ export function CanvasCustomizerScreen({
               type="button"
               onClick={handleFinish}
               disabled={isRendering}
-              className="flex min-h-[54px] w-full items-center justify-center gap-2 rounded-xl bg-zinc-900 text-sm font-bold text-white shadow-md transition active:scale-[0.98] disabled:opacity-50 hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 cursor-pointer"
+              className="flex min-h-[54px] w-full items-center justify-center gap-2 rounded-xl bg-[#1d1d1f] text-sm font-semibold text-white shadow-xs tap-bounce disabled:opacity-50 hover:bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 cursor-pointer"
             >
               <CheckCircle2 className="h-5 w-5" />
               <span>Selesai & Lanjut Cetak Otomatis</span>
               <ChevronRight className="h-4 w-4" />
             </button>
-            <span className="text-center text-[10px] text-zinc-500 block mt-1 font-medium">
+            <span className="text-center text-[10px] text-zinc-500 block mt-1 font-normal">
               Foto akan langsung dicetak otomatis tanpa perlu tekan tombol manual
             </span>
           </div>

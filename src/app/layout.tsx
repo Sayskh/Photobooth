@@ -1,9 +1,16 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "KioskSnap - Photobooth IMK",
   description: "Self-Service Touchscreen Photobooth Kiosk",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#f5f5f7",
 };
 
 export default function RootLayout({
@@ -13,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id">
-      <body className="min-h-screen bg-zinc-50 text-zinc-900 antialiased selection:bg-transparent">
+      <body className="min-h-dvh bg-[#f5f5f7] text-[#1d1d1f] antialiased selection:bg-zinc-200 overflow-x-hidden">
         {children}
       </body>
     </html>

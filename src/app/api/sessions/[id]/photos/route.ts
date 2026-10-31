@@ -7,7 +7,7 @@ export async function POST(
 ) {
   try {
     const { id: sessionId } = await params;
-    const { poseIndex, dataUrl } = await req.json();
+    const { poseIndex, dataUrl, liveVideoUrl } = await req.json();
 
     if (!sessionId || poseIndex === undefined || !dataUrl) {
       return NextResponse.json(
@@ -32,6 +32,7 @@ export async function POST(
         sessionId,
         poseIndex: Number(poseIndex),
         filePath: dataUrl,
+        liveVideoUrl: liveVideoUrl || null,
       },
     });
 

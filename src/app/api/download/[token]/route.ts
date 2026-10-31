@@ -39,10 +39,12 @@ export async function GET(
     return NextResponse.json({
       success: true,
       compositeImage: composite.finalImagePath,
+      videoMontageUrl: composite.videoMontageUrl || null,
       layoutType: composite.frameTemplate?.layoutType || "STRIP_2X6",
       shots: composite.session.photoShots.map((s) => ({
         poseIndex: s.poseIndex,
         image: s.filePath,
+        liveVideo: s.liveVideoUrl || null,
       })),
       createdAt: composite.createdAt,
     });

@@ -13,6 +13,7 @@ export async function POST(
       frameColor,
       stickersData,
       finalImagePath,
+      videoMontageUrl,
     } = await req.json();
 
     if (!sessionId || !frameTemplateId || !finalImagePath) {
@@ -41,6 +42,7 @@ export async function POST(
         frameColor: frameColor || "#FFFFFF",
         stickersData: stickersData ? JSON.stringify(stickersData) : null,
         finalImagePath,
+        videoMontageUrl: videoMontageUrl || null,
       },
       create: {
         sessionId,
@@ -49,6 +51,7 @@ export async function POST(
         frameColor: frameColor || "#FFFFFF",
         stickersData: stickersData ? JSON.stringify(stickersData) : null,
         finalImagePath,
+        videoMontageUrl: videoMontageUrl || null,
       },
     });
 

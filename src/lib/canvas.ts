@@ -82,14 +82,8 @@ export async function renderCompositeCanvas(
   if (!ctx) throw new Error("Gagal menginisialisasi canvas.");
 
   // Determine needed photo count
-  let targetCount = 4;
-  if (layoutType === "STRIP_2X6_3" || layoutType === "STRIP_2X6") targetCount = 3;
-  else if (layoutType === "STRIP_2X6_4") targetCount = 4;
-  else if (layoutType === "CARD_4X6_6") targetCount = 6;
-  else if (layoutType === "CARD_4X6_4" || layoutType === "GRID_4X6") targetCount = 4;
-  else if (layoutType === "CARD_4X6_TRIPLE") targetCount = 3;
-  else if (layoutType === "CARD_4X6_2" || layoutType === "POLAROID") targetCount = 2;
-  else if (layoutType === "CARD_4X6_1") targetCount = 1;
+  let targetCount = 3;
+  if (layoutType === "STRIP_2X6_4") targetCount = 4;
 
   const imageSources = Array.from({ length: Math.max(targetCount, photos.length) }).map(
     (_, idx) => photos[idx] || photos[0] || ""
@@ -101,7 +95,7 @@ export async function renderCompositeCanvas(
   // ====================================================
   // 1. STRIP_2X6_3 (2x6" 3 PHOTO - 2 VERTICAL STRIPS)
   // ====================================================
-  if (layoutType === "STRIP_2X6_3" || layoutType === "STRIP_2X6") {
+  if (layoutType === "STRIP_2X6_3") {
     const stripWidth = 600;
     const stripHeight = 1800;
 
@@ -191,179 +185,6 @@ export async function renderCompositeCanvas(
     );
 
     drawPerforationCutLine(ctx, stripWidth, stripHeight);
-  }
-
-  // ====================================================
-  // 3. CARD_4X6_6 (4x6" 6 PHOTO - 2x3 GRID PORTRAIT)
-  // ====================================================
-  else if (layoutType === "CARD_4X6_6") {
-    drawThemeBackground(ctx, 0, 0, canvasWidth, canvasHeight, themeStyle, frameColor);
-
-    const marginX = 55;
-    const gapX = 25;
-    const slotWidth = 532;
-    const slotHeight = 350;
-    const startY = 60;
-    const gapY = 22;
-
-    const positions = [
-      { x: marginX, y: startY },
-      { x: marginX + slotWidth + gapX, y: startY },
-      { x: marginX, y: startY + slotHeight + gapY },
-      { x: marginX + slotWidth + gapX, y: startY + slotHeight + gapY },
-      { x: marginX, y: startY + (slotHeight + gapY) * 2 },
-      { x: marginX + slotWidth + gapX, y: startY + (slotHeight + gapY) * 2 },
-    ];
-
-    for (let i = 0; i < 6; i++) {
-      const img = loadedImages[i] || loadedImages[0];
-      drawCroppedImage(ctx, img, positions[i].x, positions[i].y, slotWidth, slotHeight, filter);
-    }
-
-    const footerY = startY + 3 * (slotHeight + gapY) + 20;
-    renderPostcardFooter(
-      ctx,
-      marginX,
-      footerY,
-      canvasWidth - marginX * 2,
-      themeStyle,
-      frameColor,
-      watermarkText,
-      "6-SHOTS GRID PHOTO CARD"
-    );
-  }
-
-  // ====================================================
-  // 4. CARD_4X6_4 (4x6" 4 PHOTO - 2x2 GRID PORTRAIT)
-  // ====================================================
-  else if (layoutType === "CARD_4X6_4" || layoutType === "GRID_4X6") {
-    drawThemeBackground(ctx, 0, 0, canvasWidth, canvasHeight, themeStyle, frameColor);
-
-    const marginX = 55;
-    const gapX = 30;
-    const slotWidth = 530;
-    const slotHeight = 440;
-    const startY = 80;
-    const gapY = 30;
-
-    const positions = [
-      { x: marginX, y: startY },
-      { x: marginX + slotWidth + gapX, y: startY },
-      { x: marginX, y: startY + slotHeight + gapY },
-      { x: marginX + slotWidth + gapX, y: startY + slotHeight + gapY },
-    ];
-
-    for (let i = 0; i < 4; i++) {
-      const img = loadedImages[i] || loadedImages[0];
-      drawCroppedImage(ctx, img, positions[i].x, positions[i].y, slotWidth, slotHeight, filter);
-    }
-
-    const footerY = startY + 2 * (slotHeight + gapY) + 30;
-    renderPostcardFooter(
-      ctx,
-      marginX,
-      footerY,
-      canvasWidth - marginX * 2,
-      themeStyle,
-      frameColor,
-      watermarkText,
-      "4-SHOTS MODERN POSTCARD"
-    );
-  }
-
-  // ====================================================
-  // 5. CARD_4X6_TRIPLE (4x6" TRIPLE PHOTO - 3 VERTICAL SLOTS)
-  // ====================================================
-  else if (layoutType === "CARD_4X6_TRIPLE") {
-    drawThemeBackground(ctx, 0, 0, canvasWidth, canvasHeight, themeStyle, frameColor);
-
-    const marginX = 45;
-    const gapX = 20;
-    const slotWidth = Math.round((canvasWidth - marginX * 2 - gapX * 2) / 3); // ~356 px
-    const slotHeight = 880;
-    const startY = 90;
-
-    for (let i = 0; i < 3; i++) {
-      const x = marginX + i * (slotWidth + gapX);
-      const img = loadedImages[i] || loadedImages[0];
-      drawCroppedImage(ctx, img, x, startY, slotWidth, slotHeight, filter);
-    }
-
-    const footerY = startY + slotHeight + 45;
-    renderPostcardFooter(
-      ctx,
-      marginX,
-      footerY,
-      canvasWidth - marginX * 2,
-      themeStyle,
-      frameColor,
-      watermarkText,
-      "TRIPLE PHOTO EDITORIAL"
-    );
-  }
-
-  // ====================================================
-  // 6. CARD_4X6_2 (4x6" 2 PHOTO - DUO POLAROID / STACKED)
-  // ====================================================
-  else if (layoutType === "CARD_4X6_2" || layoutType === "POLAROID") {
-    drawThemeBackground(ctx, 0, 0, canvasWidth, canvasHeight, themeStyle, frameColor);
-
-    const marginX = 60;
-    const slotWidth = canvasWidth - marginX * 2; // 1080 px
-    const slotHeight = 520;
-    const startY = 80;
-    const gapY = 35;
-
-    drawCroppedImage(ctx, loadedImages[0], marginX, startY, slotWidth, slotHeight, filter);
-    drawCroppedImage(
-      ctx,
-      loadedImages[1] || loadedImages[0],
-      marginX,
-      startY + slotHeight + gapY,
-      slotWidth,
-      slotHeight,
-      filter
-    );
-
-    const footerY = startY + 2 * slotHeight + gapY + 40;
-    renderPolaroidChin(
-      ctx,
-      marginX,
-      footerY,
-      slotWidth,
-      canvasHeight - footerY - 40,
-      themeStyle,
-      frameColor,
-      watermarkText,
-      "Together Forever"
-    );
-  }
-
-  // ====================================================
-  // 7. CARD_4X6_1 (4x6" PORTRAIT SINGLE PHOTO - POLAROID JUMBO)
-  // ====================================================
-  else if (layoutType === "CARD_4X6_1") {
-    drawThemeBackground(ctx, 0, 0, canvasWidth, canvasHeight, themeStyle, frameColor);
-
-    const marginX = 60;
-    const slotWidth = canvasWidth - marginX * 2; // 1080 px
-    const slotHeight = 1240;
-    const startY = 70;
-
-    drawCroppedImage(ctx, loadedImages[0], marginX, startY, slotWidth, slotHeight, filter);
-
-    const footerY = startY + slotHeight + 35;
-    renderPolaroidChin(
-      ctx,
-      marginX,
-      footerY,
-      slotWidth,
-      canvasHeight - footerY - 40,
-      themeStyle,
-      frameColor,
-      watermarkText,
-      "Sweet Memories"
-    );
   }
 
   // Draw Custom User Stickers on Top

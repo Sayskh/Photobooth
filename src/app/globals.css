@@ -1,22 +1,74 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fafaf9;
-  --foreground: #1c1917;
+  --background: #f5f5f7;
+  --foreground: #1d1d1f;
+  --surface: #ffffff;
+  --surface-subtle: #fbfbfd;
+  --border-subtle: #e5e5ea;
+  --border-strong: #d2d2d7;
+  --accent-camera: #ff3b30;
+  --accent-primary: #1d1d1f;
 }
 
 body {
-  background-color: #fafaf9;
-  color: #1c1917;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: #f5f5f7;
+  color: #1d1d1f;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, sans-serif;
   user-select: none;
   -webkit-user-select: none;
   touch-action: manipulation;
 }
 
-/* Kiosk mode prevent text selection & context menu */
+/* Touch feedback and mobile native base */
 * {
   -webkit-tap-highlight-color: transparent;
+}
+
+input, textarea, select {
+  font-size: 16px;
+}
+
+/* Tactile button active bounce */
+.tap-bounce {
+  transition: transform 120ms cubic-bezier(0.23, 1, 0.32, 1), opacity 120ms ease-out;
+}
+.tap-bounce:active {
+  transform: scale(0.97);
+  opacity: 0.94;
+}
+
+/* Safe area support for kiosks and notched tablets */
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+}
+
+/* Hide scrollbar for clean kiosk experience */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Apple Studio Clean Backdrop */
+.studio-bg {
+  background-color: #f5f5f7;
+}
+
+/* Fluid kiosk container helper */
+.kiosk-screen {
+  min-height: 100dvh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* Print Styles - True 4R Portrait (4x6 inch / 1200x1800 px @ 300 DPI) */

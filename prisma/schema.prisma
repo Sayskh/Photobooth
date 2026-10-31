@@ -81,12 +81,13 @@ model FrameTemplate {
 }
 
 model PhotoShot {
-  id         String   @id @default(uuid())
-  sessionId  String
-  session    Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  poseIndex  Int      // 1, 2, 3, 4
-  filePath   String   // data URL atau path lokal
-  capturedAt DateTime @default(now())
+  id           String   @id @default(uuid())
+  sessionId    String
+  session      Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  poseIndex    Int      // 1, 2, 3, 4
+  filePath     String   // data URL atau path lokal
+  liveVideoUrl String?  // Data URL video live photo per pose (MP4/WebM)
+  capturedAt   DateTime @default(now())
 }
 
 model PhotoComposite {
@@ -99,6 +100,7 @@ model PhotoComposite {
   frameColor      String        @default("#FFFFFF")
   stickersData    String?       // JSON stringified koordinat stiker
   finalImagePath  String        // Base64 data URL atau path file siap unduh
+  videoMontageUrl String?       // Data URL gabungan animasi live photo (MP4/WebM)
   qrDownloadToken String        @unique @default(cuid())
   createdAt       DateTime      @default(now())
 }

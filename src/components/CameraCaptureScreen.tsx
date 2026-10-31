@@ -3,7 +3,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
   Camera,
-  RefreshCw,
   AlertTriangle,
   RotateCcw,
   Clock,
@@ -16,7 +15,7 @@ interface CameraCaptureScreenProps {
   slotsCount: number;
   sessionSecondsLeft: number;
   cameraDeviceId?: string | null;
-  onAllPhotosCaptured: (photos: string[]) => void;
+  onAllPhotosCaptured: (photos: string[], liveVideos?: string[]) => void;
   onTimeExpired?: () => void;
 }
 
@@ -30,13 +29,16 @@ export function CameraCaptureScreen({
   const streamRef = useRef<MediaStream | null>(null);
 
   const [capturedPhotos, setCapturedPhotos] = useState<string[]>([]);
-  const [retakeIndex, setRetakeIndex] = useState<number | null>(null);
+  const [liveVideos, setLiveVideos] = useState<string[]>([]);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordedChunksRef = useRef<Blob[]>([]);
+
+  const [reviewingPhoto, setReviewingPhoto] = useState<string | null>(null);
   const [countdown, setCountdown] = useState<number | null>(null);
   const [isFlashing, setIsFlashing] = useState<boolean>(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
 
-  const isAllCaptured = capturedPhotos.length === slotsCount && retakeIndex === null;
-  const currentPose = retakeIndex !== null ? retakeIndex + 1 : capturedPhotos.length + 1;
+  const currentPose = capturedPhotos.length + 1;
 
   useEffect(() => {
     let mounted = true;
@@ -100,46 +102,45 @@ export function CameraCaptureScreen({
   };
 
   const triggerPoseSequence = () => {
-    if (countdown !== null) return;
+    if (countdown !== null || reviewingPhoto !== null) return;
     setCountdown(3);
     sounds.playTick();
+
+    // Start recording Live Photo clip (2-3 seconds before shutter)
+    if (typeof window !== "undefined" && window.MediaRecorder && streamRef.current) {
+      try {
+        recordedChunksRef.current = [];
+        const mimeType = MediaRecorder.isTypeSupported("video/mp4")
+          ? "video/mp4"
+          : MediaRecorder.isTypeSupported("video/webm;codecs=vp9")
+          ? "video/webm;codecs=vp9"
+          : "video/webm";
+
+        const rec = new MediaRecorder(streamRef.current, { mimeType });
+        rec.ondataavailable = (e) => {
+          if (e.data && e.data.size > 0) {
+            recordedChunksRef.current.push(e.data);
+          }
+        };
+        rec.start(100);
+        mediaRecorderRef.current = rec;
+      } catch (err) {
+        console.warn("Live photo recording error:", err);
+      }
+    }
   };
 
   // Keyboard shortcut: Spacebar triggers shutter
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.code === "Space" && !isAllCaptured && countdown === null) {
+      if (e.code === "Space" && reviewingPhoto === null && countdown === null) {
         e.preventDefault();
         triggerPoseSequence();
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isAllCaptured, countdown]);
-
-  const handleRetakeSpecificPose = (index: number) => {
-    sounds.playClick();
-    setRetakeIndex(index);
-  };
-
-  const handleRetakeLastPose = () => {
-    if (capturedPhotos.length === 0 || countdown !== null) return;
-    sounds.playClick();
-    setCapturedPhotos((prev) => prev.slice(0, -1));
-    setRetakeIndex(null);
-  };
-
-  const handleRetakeAll = () => {
-    if (countdown !== null) return;
-    sounds.playClick();
-    setCapturedPhotos([]);
-    setRetakeIndex(null);
-  };
-
-  const handleConfirmAndProceed = () => {
-    sounds.playSuccess();
-    onAllPhotosCaptured(capturedPhotos);
-  };
+  }, [reviewingPhoto, countdown]);
 
   useEffect(() => {
     if (countdown === null) return;
@@ -162,286 +163,106 @@ export function CameraCaptureScreen({
           setIsFlashing(false);
         }, 150);
 
+        // Stop live photo recording and convert to dataUrl
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+          const currentRec = mediaRecorderRef.current;
+          currentRec.onstop = () => {
+            const mimeType = currentRec.mimeType || "video/webm";
+            const blob = new Blob(recordedChunksRef.current, { type: mimeType });
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              if (typeof reader.result === "string") {
+                setLiveVideos((prev) => [...prev, reader.result as string]);
+              }
+            };
+            reader.readAsDataURL(blob);
+          };
+          currentRec.stop();
+        }
+
         if (photo) {
-          if (retakeIndex !== null) {
-            setCapturedPhotos((prev) => {
-              const updated = [...prev];
-              updated[retakeIndex] = photo;
-              return updated;
-            });
-            setRetakeIndex(null);
-          } else {
-            setCapturedPhotos((prev) => [...prev, photo]);
-          }
+          setCapturedPhotos((prev) => [...prev, photo]);
+          setReviewingPhoto(photo);
         }
 
         setCountdown(null);
       }, 1000);
       return () => clearTimeout(timer);
     }
-  }, [countdown, retakeIndex]);
-
-  // Strip-aware guidance helper
-  const getStripTitle = (poseNumber: number) => {
-    if (slotsCount === 6) {
-      if (poseNumber <= 3) {
-        return `Strip 1 • Pose ${poseNumber} dari 3`;
-      }
-      return `Strip 2 • Pose ${poseNumber - 3} dari 3 (Pose ke-${poseNumber} Total)`;
-    }
-    if (slotsCount === 4) {
-      if (poseNumber <= 2) {
-        return `Kartu 1 • Pose ${poseNumber} dari 2`;
-      }
-      return `Kartu 2 • Pose ${poseNumber - 2} dari 2 (Pose ke-${poseNumber} Total)`;
-    }
-    return `Pose ${poseNumber} dari ${slotsCount}`;
-  };
-
-  const getSubPoseGuidance = (poseNumber: number) => {
-    if (slotsCount === 6) {
-      if (poseNumber === 1) return "Pose senyum terbaikmu untuk strip pertama";
-      if (poseNumber === 2) return "Gaya candid atau pose manis bersama teman";
-      if (poseNumber === 3) return "Pose bebas penutup untuk lembar Strip 1";
-      if (poseNumber === 4) return "Mulai pose baru untuk lembar Strip 2!";
-      if (poseNumber === 5) return "Pose lucu, ekspresif, atau gaya andalan";
-      if (poseNumber === 6) return "Jepretan terakhir untuk lembar Strip 2";
-    }
-    return `Ambil jepretan pose ke-${poseNumber}`;
-  };
+  }, [countdown]);
 
   const mins = Math.floor(sessionSecondsLeft / 60);
   const secs = sessionSecondsLeft % 60;
   const timeFormatted = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
 
+  const statusText = reviewingPhoto
+    ? `Review Pose ${capturedPhotos.length} dari ${slotsCount}`
+    : `Pose ${currentPose} dari ${slotsCount}`;
+
   return (
-    <div className="relative flex h-screen w-screen flex-col items-center justify-between bg-zinc-100 p-5 select-none overflow-hidden font-sans text-zinc-900">
+    <div className="relative flex min-h-dvh w-full flex-col items-center justify-between studio-bg p-3 md:p-5 select-none overflow-hidden font-sans text-zinc-900">
       {/* Top Status Bar */}
-      <div className="z-10 flex w-full max-w-5xl items-center justify-between rounded-xl bg-white px-5 py-3 border border-zinc-200/90 shadow-2xs">
+      <div className="z-10 flex w-full max-w-5xl items-center justify-between rounded-2xl bg-white px-5 py-3 border border-zinc-200/80 shadow-xs">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-zinc-900 text-white shadow-2xs">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#1d1d1f] text-white shadow-xs">
             <Camera className="h-4.5 w-4.5" />
           </div>
           <div>
             <span className="text-sm md:text-base font-bold text-zinc-900 block leading-tight">
-              {isAllCaptured
-                ? "Semua Pose Lengkap (Review & Lanjut)"
-                : getStripTitle(currentPose)}
+              {statusText}
             </span>
-            {!isAllCaptured && (
-              <span className="text-[11px] font-medium text-zinc-500 block">
-                {getSubPoseGuidance(currentPose)}
-              </span>
-            )}
+            <span className="text-[11px] font-normal text-zinc-500 block">
+              {reviewingPhoto
+                ? "Periksa pose Anda sebelum lanjut"
+                : "Bersiap di depan kamera"}
+            </span>
           </div>
         </div>
 
         {/* Global Session Timer */}
         <div
-          className={`flex items-center gap-2 rounded-lg px-3.5 py-1.5 font-mono text-xs font-bold border transition ${
+          className={`flex items-center gap-2 rounded-xl px-3.5 py-1.5 font-mono text-xs font-semibold border transition ${
             sessionSecondsLeft <= 60
-              ? "bg-red-50 text-red-700 border-red-200"
+              ? "bg-red-50 text-red-700 border-red-200 animate-pulse"
               : "bg-zinc-100 text-zinc-800 border-zinc-200"
           }`}
         >
-          <Clock className={`h-3.5 w-3.5 ${sessionSecondsLeft <= 60 ? "text-red-600" : "text-zinc-600"}`} />
+          <Clock className={`h-3.5 w-3.5 ${sessionSecondsLeft <= 60 ? "text-red-500" : "text-zinc-600"}`} />
           <span>Sisa Waktu: {timeFormatted}</span>
         </div>
 
         {/* Visual Pose Progression Tracker */}
         <div className="hidden sm:flex items-center gap-2" aria-label="Status progres pose">
-          {slotsCount === 6 ? (
-            <div className="flex items-center gap-3">
-              {/* Strip 1 Group */}
-              <div className="flex items-center gap-1 bg-zinc-100 px-2 py-1 rounded-md border border-zinc-200">
-                <span className="text-[9px] font-mono font-bold text-zinc-500 mr-1 uppercase">S1</span>
-                {[0, 1, 2].map((i) => (
-                  <div
-                    key={i}
-                    className={`h-2.5 w-5 rounded-full transition-all ${
-                      i < capturedPhotos.length
-                        ? "bg-zinc-900"
-                        : i + 1 === currentPose
-                        ? "bg-red-600 ring-2 ring-red-300"
-                        : "bg-zinc-300"
-                    }`}
-                  />
-                ))}
-              </div>
-
-              {/* Strip 2 Group */}
-              <div className="flex items-center gap-1 bg-zinc-100 px-2 py-1 rounded-md border border-zinc-200">
-                <span className="text-[9px] font-mono font-bold text-zinc-500 mr-1 uppercase">S2</span>
-                {[3, 4, 5].map((i) => (
-                  <div
-                    key={i}
-                    className={`h-2.5 w-5 rounded-full transition-all ${
-                      i < capturedPhotos.length
-                        ? "bg-zinc-900"
-                        : i + 1 === currentPose
-                        ? "bg-red-600 ring-2 ring-red-300"
-                        : "bg-zinc-300"
-                    }`}
-                  />
-                ))}
-              </div>
-            </div>
-          ) : (
-            <div className="flex items-center gap-1.5">
-              {Array.from({ length: slotsCount }).map((_, i) => (
-                <div
-                  key={i}
-                  className={`h-2.5 w-6 rounded-full transition-all ${
-                    i < capturedPhotos.length
-                      ? "bg-zinc-900"
-                      : i + 1 === currentPose
-                      ? "bg-red-600 ring-2 ring-red-300"
-                      : "bg-zinc-200"
-                  }`}
-                />
-              ))}
-            </div>
-          )}
+          <div className="flex items-center gap-1.5">
+            {Array.from({ length: slotsCount }).map((_, i) => (
+              <div
+                key={i}
+                className={`h-2.5 w-6 rounded-md transition-all ${
+                  i < capturedPhotos.length
+                    ? "bg-[#1d1d1f]"
+                    : i + 1 === currentPose
+                    ? "bg-zinc-500 ring-2 ring-zinc-300"
+                    : "bg-zinc-200"
+                }`}
+              />
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Main Center Stage: Live Webcam Feed OR Review Grid */}
-      {isAllCaptured ? (
-        <div className="relative flex flex-1 flex-col items-center justify-between my-2.5 w-full max-w-5xl rounded-2xl bg-white p-5 border border-zinc-200/90 shadow-sm overflow-hidden">
-          <div className="text-center mb-2">
-            <h3 className="text-lg font-bold text-zinc-900">
-              Periksa Hasil Foto Anda
-            </h3>
-            <p className="text-xs text-zinc-600">
-              Ketuk tombol ulang pada foto jika ingin mengganti pose tertentu, atau tekan tombol lanjut untuk menghias foto.
-            </p>
-          </div>
-
-          {/* Grouped Strip Result Cards */}
-          <div className="w-full max-w-4xl flex-1 overflow-y-auto px-2 py-1 space-y-4">
-            {slotsCount === 6 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* STRIP 1 CARD GROUP */}
-                <div className="rounded-xl bg-zinc-50 p-3 border border-zinc-200">
-                  <div className="flex items-center justify-between mb-2 pb-1.5 border-b border-zinc-200">
-                    <span className="text-xs font-bold text-zinc-900 uppercase tracking-wider">
-                      Lembar Cetak Strip 1
-                    </span>
-                    <span className="text-[10px] font-mono text-zinc-500">Pose 1 - 3</span>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    {[0, 1, 2].map((idx) => (
-                      <div
-                        key={idx}
-                        className="flex flex-col items-center rounded-lg bg-white p-1.5 border border-zinc-200 shadow-2xs"
-                      >
-                        <div className="aspect-[4/3] w-full overflow-hidden rounded bg-zinc-900">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={capturedPhotos[idx]}
-                            alt={`Pose ${idx + 1}`}
-                            className="h-full w-full object-cover"
-                          />
-                        </div>
-                        <span className="text-[10px] font-bold text-zinc-800 mt-1">
-                          Foto {idx + 1}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => handleRetakeSpecificPose(idx)}
-                          className="mt-1 flex min-h-[36px] w-full items-center justify-center gap-1 text-[11px] font-semibold text-red-700 bg-red-50 hover:bg-red-100 rounded border border-red-200 transition active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 cursor-pointer"
-                        >
-                          <RotateCcw className="h-3 w-3" />
-                          <span>Ulang</span>
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* STRIP 2 CARD GROUP */}
-                <div className="rounded-xl bg-zinc-50 p-3 border border-zinc-200">
-                  <div className="flex items-center justify-between mb-2 pb-1.5 border-b border-zinc-200">
-                    <span className="text-xs font-bold text-zinc-900 uppercase tracking-wider">
-                      Lembar Cetak Strip 2 (Pose Beda)
-                    </span>
-                    <span className="text-[10px] font-mono text-zinc-500">Pose 4 - 6</span>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    {[3, 4, 5].map((idx) => (
-                      <div
-                        key={idx}
-                        className="flex flex-col items-center rounded-lg bg-white p-1.5 border border-zinc-200 shadow-2xs"
-                      >
-                        <div className="aspect-[4/3] w-full overflow-hidden rounded bg-zinc-900">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={capturedPhotos[idx]}
-                            alt={`Pose ${idx + 1}`}
-                            className="h-full w-full object-cover"
-                          />
-                        </div>
-                        <span className="text-[10px] font-bold text-zinc-800 mt-1">
-                          Foto {idx + 1}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => handleRetakeSpecificPose(idx)}
-                          className="mt-1 flex min-h-[36px] w-full items-center justify-center gap-1 text-[11px] font-semibold text-red-700 bg-red-50 hover:bg-red-100 rounded border border-red-200 transition active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 cursor-pointer"
-                        >
-                          <RotateCcw className="h-3 w-3" />
-                          <span>Ulang</span>
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div
-                className={`grid gap-3 ${
-                  slotsCount === 1
-                    ? "grid-cols-1 max-w-sm mx-auto"
-                    : slotsCount === 2
-                    ? "grid-cols-2 max-w-lg mx-auto"
-                    : slotsCount === 3
-                    ? "grid-cols-3 max-w-2xl mx-auto"
-                    : "grid-cols-2 md:grid-cols-4"
-                }`}
-              >
-                {capturedPhotos.map((photo, idx) => (
-                  <div
-                    key={idx}
-                    className="flex flex-col items-center rounded-xl bg-zinc-50 p-2.5 border border-zinc-200 shadow-2xs"
-                  >
-                    <div className="aspect-[4/3] w-full overflow-hidden rounded-lg bg-zinc-900">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={photo}
-                        alt={`Pose ${idx + 1}`}
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-                    <div className="mt-2 flex w-full items-center justify-between">
-                      <span className="text-xs font-bold text-zinc-800">Pose {idx + 1}</span>
-                      <button
-                        type="button"
-                        onClick={() => handleRetakeSpecificPose(idx)}
-                        className="flex min-h-[38px] items-center gap-1 text-xs font-semibold text-red-700 bg-red-50 hover:bg-red-100 px-3 rounded-md border border-red-200 transition active:scale-95 cursor-pointer"
-                      >
-                        <RotateCcw className="h-3 w-3" />
-                        <span>Ulang</span>
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+      {/* Main Center Stage: Live Webcam Feed OR Frozen Review */}
+      {reviewingPhoto !== null ? (
+        <div className="relative flex flex-1 w-full max-w-5xl items-center justify-center my-2 rounded-2xl overflow-hidden bg-zinc-950 border border-zinc-300 shadow-sm">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={reviewingPhoto}
+            alt={`Review Pose ${capturedPhotos.length}`}
+            className="h-full w-full object-cover"
+          />
         </div>
       ) : (
         /* LIVE VIEWPORT CONTAINER */
-        <div className="relative flex flex-1 w-full max-w-5xl items-center justify-center my-2 rounded-2xl overflow-hidden bg-zinc-950 border border-zinc-300 shadow-md">
+        <div className="relative flex flex-1 w-full max-w-5xl items-center justify-center my-2 rounded-2xl overflow-hidden bg-zinc-950 border border-zinc-300 shadow-sm">
           {cameraError ? (
             <div className="flex flex-col items-center gap-3 p-6 text-center text-red-300">
               <AlertTriangle className="h-10 w-10 text-red-400" />
@@ -465,40 +286,26 @@ export function CameraCaptureScreen({
 
           {/* Dynamic Studio Countdown Ring */}
           {countdown !== null && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/45 z-20 backdrop-blur-xs">
-              <div className="relative flex h-36 w-36 items-center justify-center rounded-full border-4 border-white/90 bg-zinc-950/70 shadow-2xl">
-                <span className="font-mono text-7xl font-black text-white">
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 z-20 backdrop-blur-xs">
+              <div className="relative flex h-32 w-32 items-center justify-center rounded-full border-4 border-white/80 bg-black/60 shadow-xl">
+                <span className="font-mono text-6xl font-bold text-white">
                   {countdown}
                 </span>
               </div>
-              <span className="mt-4 text-sm font-bold tracking-wider text-white uppercase drop-shadow-md">
-                Tatap Kamera & Tahan Senyum!
+              <span className="mt-4 text-xs font-semibold tracking-wider text-white uppercase drop-shadow-sm">
+                Tatap Kamera & Bersiap!
               </span>
-            </div>
-          )}
-
-          {/* Retake Mode Badge */}
-          {retakeIndex !== null && countdown === null && (
-            <div className="absolute top-4 left-4 z-20 rounded-lg bg-zinc-900/90 px-3.5 py-2 text-xs text-white font-bold backdrop-blur-sm flex items-center gap-2 border border-white/20 shadow-lg">
-              <RotateCcw className="h-3.5 w-3.5 text-amber-400" />
-              <span>Mode Jepret Ulang: Pose {retakeIndex + 1}</span>
             </div>
           )}
 
           {/* Bottom Live Thumbnails Shelf */}
           {capturedPhotos.length > 0 && (
-            <div className="absolute bottom-4 left-4 z-20 flex gap-2 overflow-x-auto max-w-[70%] p-1.5 rounded-xl bg-black/40 backdrop-blur-md border border-white/10">
+            <div className="absolute bottom-4 left-4 z-20 flex gap-2 overflow-x-auto max-w-[70%] p-1.5 rounded-xl bg-black/50 backdrop-blur-md border border-white/20">
               {capturedPhotos.map((shot, idx) => (
-                <button
-                  type="button"
+                <div
                   key={idx}
-                  onClick={() => handleRetakeSpecificPose(idx)}
-                  className={`relative h-14 w-20 overflow-hidden rounded-lg border-2 shadow-sm bg-zinc-800 cursor-pointer transition hover:scale-105 active:scale-95 focus-visible:outline-none shrink-0 ${
-                    retakeIndex === idx
-                      ? "border-amber-400 ring-2 ring-amber-300"
-                      : "border-white/80"
-                  }`}
-                  aria-label={`Ulang Pose ${idx + 1}`}
+                  className="relative h-14 w-20 overflow-hidden rounded-lg border border-white/80 shadow-xs bg-zinc-800 shrink-0"
+                  aria-label={`Pose ${idx + 1}`}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
@@ -506,10 +313,10 @@ export function CameraCaptureScreen({
                     alt={`Pose ${idx + 1}`}
                     className="h-full w-full object-cover"
                   />
-                  <span className="absolute bottom-0.5 right-1 text-[8px] font-mono font-bold text-white bg-black/70 px-1 rounded">
-                    {slotsCount === 6 ? (idx < 3 ? `S1-${idx + 1}` : `S2-${idx - 2}`) : `#${idx + 1}`}
+                  <span className="absolute bottom-0.5 right-1 text-[8px] font-mono font-bold text-white bg-black/80 px-1 rounded">
+                    #{idx + 1}
                   </span>
-                </button>
+                </div>
               ))}
             </div>
           )}
@@ -518,50 +325,57 @@ export function CameraCaptureScreen({
 
       {/* BOTTOM TOUCH CONTROL BAR */}
       <div className="z-10 flex w-full max-w-2xl items-center justify-center gap-4 pt-1">
-        {isAllCaptured ? (
+        {reviewingPhoto !== null ? (
           <div className="flex w-full items-center justify-center gap-3">
             <button
               type="button"
-              onClick={handleRetakeAll}
-              className="flex min-h-[50px] items-center justify-center gap-2 rounded-xl bg-white px-5 text-xs font-bold text-zinc-700 border border-zinc-200 shadow-2xs transition active:scale-95 hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 cursor-pointer"
+              onClick={() => {
+                sounds.playClick();
+                setCapturedPhotos((prev) => prev.slice(0, -1));
+                setLiveVideos((prev) => prev.slice(0, -1));
+                setReviewingPhoto(null);
+              }}
+              className="flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-white px-5 text-xs font-semibold text-zinc-700 border border-zinc-200 shadow-xs tap-bounce hover:bg-zinc-50 cursor-pointer"
             >
-              <RefreshCw className="h-4 w-4" />
-              <span>Mulai Ulang Semua</span>
+              <RotateCcw className="h-4 w-4 text-zinc-600" />
+              <span>Ulangi Pose {capturedPhotos.length}</span>
             </button>
 
             <button
               type="button"
-              onClick={handleConfirmAndProceed}
-              className="flex min-h-[52px] flex-1 max-w-md items-center justify-center gap-2 rounded-xl bg-zinc-900 text-sm font-bold text-white shadow-md transition active:scale-[0.98] hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 cursor-pointer"
+              onClick={() => {
+                sounds.playClick();
+                setReviewingPhoto(null);
+                if (capturedPhotos.length >= slotsCount) {
+                  sounds.playSuccess();
+                  onAllPhotosCaptured(capturedPhotos, liveVideos);
+                }
+              }}
+              className="flex min-h-[48px] flex-1 max-w-md items-center justify-center gap-2 rounded-xl bg-[#1d1d1f] text-xs font-semibold text-white shadow-xs tap-bounce hover:bg-black cursor-pointer"
             >
-              <CheckCircle2 className="h-5 w-5" />
-              <span>Hasil Sudah Pas, Lanjut Hias Foto</span>
+              <CheckCircle2 className="h-4 w-4" />
+              <span>
+                {capturedPhotos.length >= slotsCount
+                  ? "Hasil Sudah Pas, Lanjut Hias Foto"
+                  : `Lanjut ke Pose ${capturedPhotos.length + 1}`}
+              </span>
               <ChevronRight className="h-4 w-4" />
             </button>
           </div>
         ) : (
-          <div className="flex items-center justify-center gap-4 w-full">
-            {/* Retake / Cancel Button */}
-            {retakeIndex !== null && countdown === null ? (
+          <div className="flex items-center justify-center gap-3 w-full">
+            {capturedPhotos.length > 0 && countdown === null && (
               <button
                 type="button"
-                onClick={() => setRetakeIndex(null)}
-                className="flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-white px-4 text-xs font-bold text-zinc-700 border border-zinc-200 shadow-2xs transition active:scale-95 hover:bg-zinc-100 cursor-pointer"
+                onClick={() => {
+                  sounds.playClick();
+                  setCapturedPhotos((prev) => prev.slice(0, -1));
+                }}
+                className="flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-white px-4 text-xs font-semibold text-zinc-700 border border-zinc-200 shadow-xs tap-bounce hover:bg-zinc-50 cursor-pointer"
               >
-                <span>Batal Ulang Pose {retakeIndex + 1}</span>
+                <RotateCcw className="h-4 w-4 text-zinc-600" />
+                <span>Ulang Pose {capturedPhotos.length}</span>
               </button>
-            ) : (
-              capturedPhotos.length > 0 &&
-              countdown === null && (
-                <button
-                  type="button"
-                  onClick={handleRetakeLastPose}
-                  className="flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-white px-4 text-xs font-bold text-zinc-700 border border-zinc-200 shadow-2xs transition active:scale-95 hover:bg-zinc-100 cursor-pointer"
-                >
-                  <RotateCcw className="h-4 w-4" />
-                  <span>Ulang Pose {capturedPhotos.length}</span>
-                </button>
-              )
             )}
 
             {/* AUTHENTIC STUDIO SHUTTER TRIGGER BAR */}
@@ -571,28 +385,25 @@ export function CameraCaptureScreen({
                   type="button"
                   onClick={triggerPoseSequence}
                   aria-label="Ambil Foto Shutter"
-                  className="flex min-h-[58px] items-center gap-3.5 rounded-full bg-zinc-900 px-8 text-white border border-zinc-700 shadow-md transition active:scale-[0.97] hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 cursor-pointer"
+                  className="flex min-h-[56px] items-center gap-3 rounded-2xl bg-[#1d1d1f] px-8 text-white shadow-xs tap-bounce hover:bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 cursor-pointer"
                 >
-                  {/* Concentric Mechanical Shutter Iris Indicator */}
-                  <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-zinc-400 bg-zinc-800">
-                    <div className="h-2.5 w-2.5 rounded-full bg-white shadow-xs" />
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-white/80 bg-white/10">
+                    <div className="h-3 w-3 rounded-full bg-[#ff3b30]" />
                   </div>
 
-                  <span className="text-sm font-bold tracking-wider uppercase">
-                    {retakeIndex !== null
-                      ? `Jepret Ulang Pose ${retakeIndex + 1}`
-                      : `Ambil Pose ${currentPose}`}
+                  <span className="text-xs font-semibold tracking-wider uppercase">
+                    Ambil Pose {currentPose}
                   </span>
 
-                  <kbd className="hidden sm:inline-block rounded bg-zinc-800 px-2 py-0.5 font-mono text-[10px] font-semibold text-zinc-300 border border-zinc-700">
+                  <kbd className="hidden sm:inline-block rounded-md bg-white/15 px-2 py-0.5 font-mono text-[10px] font-semibold text-white border border-white/20">
                     SPASI
                   </kbd>
                 </button>
               </div>
             ) : (
-              <div className="flex min-h-[58px] items-center justify-center gap-3 rounded-full bg-white px-7 border border-zinc-200 text-zinc-800 shadow-2xs font-semibold text-sm">
-                <div className="h-2.5 w-2.5 rounded-full bg-zinc-900" />
-                <span>Bersiap untuk pose {retakeIndex !== null ? retakeIndex + 1 : currentPose}...</span>
+              <div className="flex min-h-[52px] items-center justify-center gap-2.5 rounded-xl bg-white px-6 border border-zinc-200 text-zinc-800 shadow-xs font-semibold text-xs">
+                <div className="h-2 w-2 rounded-full bg-[#ff3b30] animate-ping" />
+                <span>Bersiap untuk pose {currentPose}...</span>
               </div>
             )}
           </div>

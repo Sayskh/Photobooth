@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import { Clock } from "lucide-react";
 import { AttractScreen } from "@/components/AttractScreen";
 import { PaymentScreen } from "@/components/PaymentScreen";
 import { FrameSelectScreen, TemplateChoice } from "@/components/FrameSelectScreen";
@@ -9,6 +10,7 @@ import { CanvasCustomizerScreen } from "@/components/CanvasCustomizerScreen";
 import { PrintOutputScreen } from "@/components/PrintOutputScreen";
 import { AdminModal } from "@/components/AdminModal";
 import { StickerItem, renderCompositeCanvas } from "@/lib/canvas";
+import { createLivePhotoMontage } from "@/lib/videoMontage";
 
 type KioskStep =
   | "IDLE"
@@ -51,8 +53,11 @@ export default function PhotoboothKiosk() {
   const [selectedFrameColor, setSelectedFrameColor] = useState<string>("#FFFFFF");
 
   const [rawPhotos, setRawPhotos] = useState<string[]>([]);
+  const [liveVideos, setLiveVideos] = useState<string[]>([]);
+  const [videoMontageUrl, setVideoMontageUrl] = useState<string>("");
   const [finalCompositeImage, setFinalCompositeImage] = useState<string>("");
   const [qrToken, setQrToken] = useState<string>("");
+  const [showTimeWarning, setShowTimeWarning] = useState<boolean>(false);
 
   // Load Booth Configuration
   const loadBoothConfig = useCallback(async () => {
@@ -79,29 +84,60 @@ export default function PhotoboothKiosk() {
     loadBoothConfig();
   }, [loadBoothConfig]);
 
-  // Global Session Countdown Timer
-  useEffect(() => {
-    // Only countdown during active photo/edit session
-    const isSessionActive =
-      sessionId !== "" &&
-      (currentStep === "FRAME_SELECT" || currentStep === "CAPTURE" || currentStep === "CUSTOMIZE");
+  // Reset to initial Idle state
+  const handleReset = useCallback(() => {
+    setSessionId("");
+    setSessionSecondsLeft(boothConfig.sessionTimeout);
+    setSelectedTemplate(null);
+    setSelectedThemeId("THEATER_TICKET");
+    setSelectedFrameColor("#FFFFFF");
+    setRawPhotos([]);
+    setLiveVideos([]);
+    setVideoMontageUrl("");
+    setFinalCompositeImage("");
+    setQrToken("");
+    setCurrentStep("IDLE");
+  }, [boothConfig.sessionTimeout]);
 
-    if (!isSessionActive) return;
+  // Finish Customization -> Print & QR Output
+  const handleFinishCustomization = useCallback(
+    async (
+      finalDataUrl: string,
+      stickers: StickerItem[],
+      filter: string,
+      frameColor: string
+    ) => {
+      setFinalCompositeImage(finalDataUrl);
 
-    if (sessionSecondsLeft <= 0) {
-      handleTimeExpired();
-      return;
-    }
+      // Save final composite to backend
+      try {
+        const res = await fetch(`/api/sessions/${sessionId}/composite`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            frameTemplateId: selectedTemplate?.id || "template-strip-3",
+            filterSelected: filter,
+            frameColor,
+            stickersData: stickers,
+            finalImagePath: finalDataUrl,
+            videoMontageUrl: videoMontageUrl || null,
+          }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          setQrToken(data.qrDownloadToken);
+        }
+      } catch (e) {
+        console.error("Save composite error:", e);
+      }
 
-    const timer = setInterval(() => {
-      setSessionSecondsLeft((prev) => prev - 1);
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [sessionId, currentStep, sessionSecondsLeft]);
+      setCurrentStep("PRINT_OUTPUT");
+    },
+    [sessionId, selectedTemplate, videoMontageUrl]
+  );
 
   // Handle session timeout: auto render and finalize
-  const handleTimeExpired = async () => {
+  const handleTimeExpired = useCallback(async () => {
     if (rawPhotos.length > 0 && selectedTemplate) {
       try {
         const autoCanvas = await renderCompositeCanvas({
@@ -115,12 +151,69 @@ export default function PhotoboothKiosk() {
         });
         await handleFinishCustomization(autoCanvas, [], "NORMAL", selectedFrameColor);
       } catch {
-        handleFinishCustomization(rawPhotos[0], [], "NORMAL", selectedFrameColor);
+        if (rawPhotos[0]) {
+          handleFinishCustomization(rawPhotos[0], [], "NORMAL", selectedFrameColor);
+        } else {
+          handleReset();
+        }
       }
     } else {
+      // No photos at all - gracefully reset after short delay
       handleReset();
     }
-  };
+  }, [
+    rawPhotos,
+    selectedTemplate,
+    selectedFrameColor,
+    selectedThemeId,
+    boothConfig.watermarkText,
+    handleFinishCustomization,
+    handleReset,
+  ]);
+
+  // Global Session Countdown Timer - stable interval, no sessionSecondsLeft dep
+  useEffect(() => {
+    const isSessionActive =
+      sessionId !== "" &&
+      (currentStep === "FRAME_SELECT" || currentStep === "CAPTURE" || currentStep === "CUSTOMIZE");
+    if (!isSessionActive) return;
+    const timer = setInterval(() => {
+      setSessionSecondsLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [sessionId, currentStep]);
+
+  // Warning at 15 seconds
+  useEffect(() => {
+    if (
+      sessionSecondsLeft === 15 &&
+      sessionId !== "" &&
+      currentStep !== "IDLE" &&
+      currentStep !== "PAYMENT" &&
+      currentStep !== "PRINT_OUTPUT"
+    ) {
+      setShowTimeWarning(true);
+    }
+  }, [sessionSecondsLeft, sessionId, currentStep]);
+
+  // Handle actual timeout
+  useEffect(() => {
+    if (
+      sessionSecondsLeft === 0 &&
+      sessionId !== "" &&
+      currentStep !== "IDLE" &&
+      currentStep !== "PRINT_OUTPUT"
+    ) {
+      setShowTimeWarning(false);
+      handleTimeExpired();
+    }
+  }, [sessionSecondsLeft, sessionId, currentStep, handleTimeExpired]);
 
   // 1. From Attract -> Start Payment
   const handleStart = () => {
@@ -143,19 +236,32 @@ export default function PhotoboothKiosk() {
   };
 
   // 4. From Camera -> Touch-Up / Customization
-  const handleAllPhotosCaptured = async (photos: string[]) => {
+  const handleAllPhotosCaptured = async (photos: string[], videos?: string[]) => {
     setRawPhotos(photos);
+    const recordedVideos = videos || [];
+    setLiveVideos(recordedVideos);
 
-    // Save raw photo shots to server in background
+    // Save raw photo shots and live videos to server in background
     if (sessionId) {
       photos.forEach((dataUrl, idx) => {
         fetch(`/api/sessions/${sessionId}/photos`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ poseIndex: idx + 1, dataUrl }),
+          body: JSON.stringify({
+            poseIndex: idx + 1,
+            dataUrl,
+            liveVideoUrl: recordedVideos[idx] || null,
+          }),
         }).catch(console.error);
       });
     }
+
+    // Generate live photo animated video montage in background while user customizes
+    createLivePhotoMontage(recordedVideos, photos)
+      .then((montage) => {
+        if (montage) setVideoMontageUrl(montage);
+      })
+      .catch((err) => console.warn("Live photo montage error:", err));
 
     setCurrentStep("CUSTOMIZE");
   };
@@ -163,52 +269,6 @@ export default function PhotoboothKiosk() {
   // 5. From Customizer -> Back to Camera for Retake
   const handleRetakePhotos = () => {
     setCurrentStep("CAPTURE");
-  };
-
-  // 6. From Customizer -> Print & QR Output
-  const handleFinishCustomization = async (
-    finalDataUrl: string,
-    stickers: StickerItem[],
-    filter: string,
-    frameColor: string
-  ) => {
-    setFinalCompositeImage(finalDataUrl);
-
-    // Save final composite to backend
-    try {
-      const res = await fetch(`/api/sessions/${sessionId}/composite`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          frameTemplateId: selectedTemplate?.id || "template-strip-3",
-          filterSelected: filter,
-          frameColor,
-          stickersData: stickers,
-          finalImagePath: finalDataUrl,
-        }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setQrToken(data.qrDownloadToken);
-      }
-    } catch (e) {
-      console.error("Save composite error:", e);
-    }
-
-    setCurrentStep("PRINT_OUTPUT");
-  };
-
-  // Reset to initial Idle state
-  const handleReset = () => {
-    setSessionId("");
-    setSessionSecondsLeft(boothConfig.sessionTimeout);
-    setSelectedTemplate(null);
-    setSelectedThemeId("THEATER_TICKET");
-    setSelectedFrameColor("#FFFFFF");
-    setRawPhotos([]);
-    setFinalCompositeImage("");
-    setQrToken("");
-    setCurrentStep("IDLE");
   };
 
   return (
@@ -277,6 +337,42 @@ export default function PhotoboothKiosk() {
         onClose={() => setIsAdminOpen(false)}
         onSettingsSaved={loadBoothConfig}
       />
+
+      {showTimeWarning && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 backdrop-blur-md p-4">
+          <div className="flex flex-col items-center gap-4 rounded-3xl bg-white/95 backdrop-blur-md p-8 shadow-2xl border border-rose-200 max-w-sm text-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-200 to-rose-200 text-rose-800 shadow-xs">
+              <Clock className="h-8 w-8" />
+            </div>
+            <h3 className="text-xl font-black text-zinc-900">Waktu Hampir Habis!</h3>
+            <p className="text-xs text-zinc-600 font-medium leading-relaxed">
+              Tersisa <strong className="text-rose-600 font-black">{sessionSecondsLeft} detik</strong> lagi. Sesi akan otomatis memproses dan mencetak foto Anda.
+            </p>
+            <div className="flex w-full gap-2.5 pt-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setSessionSecondsLeft(prev => prev + 30);
+                  setShowTimeWarning(false);
+                }}
+                className="flex-1 min-h-[48px] rounded-xl bg-zinc-100 text-xs font-semibold text-zinc-800 border border-zinc-200 hover:bg-zinc-200 tap-bounce cursor-pointer"
+              >
+                +30 Detik
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowTimeWarning(false);
+                  handleTimeExpired();
+                }}
+                className="flex-1 min-h-[48px] rounded-xl bg-[#1d1d1f] text-xs font-semibold text-white shadow-xs tap-bounce hover:bg-black cursor-pointer"
+              >
+                Selesai Sekarang
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

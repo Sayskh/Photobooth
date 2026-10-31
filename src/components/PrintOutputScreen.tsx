@@ -98,19 +98,19 @@ export function PrintOutputScreen({
       </div>
 
       {/* Screen View Kiosk */}
-      <div className="no-print relative flex h-screen w-screen flex-col justify-between bg-zinc-50 p-6 select-none overflow-hidden font-sans">
+      <div className="no-print relative flex min-h-dvh w-full flex-col justify-between studio-bg p-4 md:p-6 select-none font-sans overflow-y-auto no-scrollbar">
         {/* Top Header */}
-        <div className="flex items-center justify-between border-b border-zinc-200 pb-3">
+        <div className="flex items-center justify-between border-b border-zinc-200/80 pb-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-zinc-900 text-white">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#1d1d1f] text-white shadow-xs">
               <Printer className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-xl font-bold tracking-tight text-zinc-900">
-                Foto Selesai dan Sedang Dicetak
+              <h2 className="text-lg md:text-xl font-bold tracking-tight text-zinc-900">
+                Foto Selesai dan Sedang Dicetak!
               </h2>
-              <p className="text-xs text-zinc-600">
-                Cetak fisik otomatis diproses mesin printer. Pindai QR code untuk softfile digital.
+              <p className="text-xs text-zinc-500 font-normal">
+                Cetak fisik otomatis diproses printer. Pindai QR code untuk softfile digital & video.
               </p>
             </div>
           </div>
@@ -121,98 +121,98 @@ export function PrintOutputScreen({
               sounds.playClick();
               onReset();
             }}
-            className="flex min-h-[44px] items-center gap-2 rounded-lg bg-white px-4 py-2 text-xs font-semibold text-zinc-700 border border-zinc-200 hover:bg-zinc-100 active:scale-95 shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900"
+            className="flex min-h-[44px] items-center gap-2 rounded-xl bg-white px-4 py-2 text-xs font-semibold text-zinc-700 border border-zinc-200 hover:bg-zinc-50 tap-bounce shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 cursor-pointer"
           >
-            <RotateCcw className="h-3.5 w-3.5" />
+            <RotateCcw className="h-3.5 w-3.5 text-zinc-600" />
             <span>Selesai Sesi ({countdown}s)</span>
           </button>
         </div>
 
         {/* Center Grid: Left Final Photo, Right Auto Print Status & QR */}
-        <div className="flex flex-1 items-center justify-center gap-8 py-4 overflow-hidden">
+        <div className="flex flex-col md:flex-row flex-1 items-center justify-center gap-4 md:gap-8 py-2 md:py-4">
           {/* Photo Preview Frame */}
-          <div className="flex h-full max-h-[75vh] items-center justify-center rounded-2xl bg-zinc-100 p-4 border border-zinc-200 shadow-xs">
+          <div className="flex max-h-[50vh] md:max-h-[70vh] items-center justify-center rounded-2xl bg-white p-4 border border-zinc-200/80 shadow-xs">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={finalImage}
               alt="Final Output"
-              className="max-h-full max-w-full rounded-lg object-contain shadow-sm border border-zinc-200"
+              className="max-h-full max-w-full rounded-xl object-contain shadow-sm border border-zinc-200"
             />
           </div>
 
           {/* Right Card: Auto Print Status & QR Softfile */}
-          <div className="flex h-full max-h-[75vh] w-[430px] flex-col justify-between rounded-2xl bg-white p-6 border border-zinc-200 shadow-sm">
+          <div className="flex w-full max-w-[430px] flex-col justify-between rounded-2xl bg-white p-5 md:p-6 border border-zinc-200/80 shadow-xs gap-4">
             {/* Top: Auto Print Status Indicator */}
-            <div className="rounded-xl bg-zinc-50 p-5 border border-zinc-200">
+            <div className="rounded-xl bg-zinc-50 p-4 md:p-5 border border-zinc-200">
               <div className="flex items-center gap-2 mb-3">
-                <Printer className="h-5 w-5 text-zinc-800" />
+                <Printer className="h-5 w-5 text-zinc-900" />
                 <span className="text-sm font-bold text-zinc-900">
                   Status Cetak Fisik
                 </span>
               </div>
 
               {isPrinting ? (
-                <div className="flex items-center gap-3 rounded-lg bg-white p-4 border border-zinc-200 shadow-2xs">
-                  <Loader2 className="h-5 w-5 animate-spin text-zinc-900 shrink-0" />
+                <div className="flex items-center gap-3 rounded-xl bg-white p-3.5 md:p-4 border border-zinc-200 shadow-xs">
+                  <Loader2 className="h-5 w-5 animate-spin text-zinc-700 shrink-0" />
                   <div>
                     <p className="text-xs font-bold text-zinc-900">
                       Sedang Mencetak 2 Strip Foto...
                     </p>
-                    <p className="text-[11px] text-zinc-600 mt-0.5">
+                    <p className="text-[11px] text-zinc-500 mt-0.5 font-normal">
                       Perintah cetak telah dikirim otomatis ke printer kios.
                     </p>
                   </div>
                 </div>
               ) : (
-                <div className="flex items-center gap-3 rounded-lg bg-emerald-50 p-4 border border-emerald-200 text-emerald-900">
+                <div className="flex items-center gap-3 rounded-xl bg-emerald-50 p-3.5 md:p-4 border border-emerald-200 text-emerald-900">
                   <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
                   <div>
                     <p className="text-xs font-bold text-emerald-900">
                       2 Strip Foto Berhasil Diproses!
                     </p>
-                    <p className="text-[11px] text-emerald-800 mt-0.5">
+                    <p className="text-[11px] text-emerald-700 mt-0.5 font-normal">
                       Silakan ambil strip foto fisik Anda di baki printer.
                     </p>
                   </div>
                 </div>
               )}
 
-              <div className="mt-3 text-[11px] text-zinc-600 leading-relaxed">
-                Kios otomatis mencetak <strong>2 strip foto fisik</strong> berkualitas studio langsung tanpa perlu menekan tombol tambahan.
+              <div className="mt-3 text-[11px] text-zinc-600 leading-relaxed font-normal">
+                Kios otomatis mencetak <strong>2 strip foto fisik</strong> studio berkualitas tinggi tanpa perlu menekan tombol tambahan.
               </div>
             </div>
 
             {/* Bottom: QR Code Softfile */}
-            <div className="flex flex-col items-center rounded-xl bg-zinc-50 p-5 border border-zinc-200 text-center">
+            <div className="flex flex-col items-center rounded-xl bg-zinc-50 p-4 md:p-5 border border-zinc-200 text-center">
               <div className="flex items-center gap-1.5 text-xs font-bold text-zinc-900 mb-2">
                 <QrCode className="h-4 w-4 text-zinc-700" />
                 <span>Unduh Softfile ke Smartphone</span>
               </div>
 
               {qrCodeDataUrl ? (
-                <div className="mb-2 rounded-lg bg-white p-2 border border-zinc-200 shadow-2xs">
+                <div className="mb-2 rounded-xl bg-white p-2.5 border border-zinc-200 shadow-xs">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={qrCodeDataUrl}
                     alt="QR Softfile"
-                    className="h-34 w-34 object-contain"
+                    className="h-32 w-32 md:h-36 md:w-36 object-contain"
                   />
                 </div>
               ) : (
-                <div className="h-34 w-34 flex items-center justify-center text-xs text-zinc-500">
+                <div className="h-32 w-32 md:h-36 md:w-36 flex items-center justify-center text-xs text-zinc-400 font-semibold">
                   Membuat QR...
                 </div>
               )}
 
-              <p className="text-[11px] text-zinc-600 max-w-xs leading-relaxed">
-                Pindai dengan kamera ponsel untuk mengunduh softfile komposit dan seluruh foto pose asli tanpa watermark.
+              <p className="text-[11px] text-zinc-500 max-w-xs leading-relaxed font-normal">
+                Pindai dengan kamera HP untuk mengunduh strip foto, lembar 4R, dan Live Photo video montage.
               </p>
             </div>
           </div>
         </div>
 
         {/* Bottom Note */}
-        <div className="text-center text-xs font-medium text-zinc-600">
+        <div className="text-center text-xs font-normal text-zinc-500">
           Terima kasih telah berfoto di KioskSnap! Sesi akan otomatis berakhir dalam {countdown} detik.
         </div>
       </div>

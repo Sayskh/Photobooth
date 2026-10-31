@@ -256,7 +256,7 @@ export function AdminModal({ isOpen, onClose, onSettingsSaved }: AdminModalProps
         {/* Top Modal Header */}
         <div className="flex items-center justify-between border-b border-zinc-200 px-6 py-4 bg-zinc-50">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-zinc-900 text-white">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#1d1d1f] text-white shadow-xs">
               <Lock className="h-4 w-4" />
             </div>
             <span className="text-base font-bold text-zinc-900">
@@ -271,22 +271,22 @@ export function AdminModal({ isOpen, onClose, onSettingsSaved }: AdminModalProps
               onClose();
             }}
             aria-label="Tutup panel"
-            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-100 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900"
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-100 tap-bounce focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 cursor-pointer"
           >
-            <X className="h-4 w-4" />
+            <X className="h-4 w-4 text-zinc-700" />
           </button>
         </div>
 
         {/* Auth Barrier */}
         {!isAuthenticated ? (
-          <div className="flex flex-1 flex-col items-center justify-center p-8 text-center bg-zinc-50">
-            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-200 text-zinc-700">
-              <Lock className="h-6 w-6" />
+          <div className="flex flex-1 flex-col items-center justify-center p-8 text-center studio-bg">
+            <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-xl bg-white text-zinc-900 shadow-xs border border-zinc-200">
+              <Lock className="h-7 w-7" />
             </div>
             <h3 className="text-lg font-bold text-zinc-900 mb-1">
               Masukkan PIN Kasir
             </h3>
-            <p className="text-xs text-zinc-600 mb-6 max-w-xs">
+            <p className="text-xs text-zinc-600 font-normal mb-6 max-w-xs">
               Akses khusus kasir untuk mencetak token transaksi tunai dan konfigurasi hardware.
             </p>
 
@@ -297,7 +297,7 @@ export function AdminModal({ isOpen, onClose, onSettingsSaved }: AdminModalProps
                 value={pinInput}
                 onChange={(e) => setPinInput(e.target.value)}
                 placeholder="PIN Default: 1234"
-                className="h-12 w-full rounded-lg bg-white border border-zinc-200 px-4 text-center font-mono text-xl tracking-widest text-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-900"
+                className="h-12 w-full rounded-xl bg-white border border-zinc-200 px-4 text-center font-mono text-xl tracking-widest text-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-900 shadow-inner"
               />
 
               {pinError && (
@@ -310,7 +310,7 @@ export function AdminModal({ isOpen, onClose, onSettingsSaved }: AdminModalProps
               <button
                 type="submit"
                 disabled={isLoading || !pinInput}
-                className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-lg bg-zinc-900 text-xs font-semibold text-white transition active:scale-98 disabled:opacity-50 hover:bg-zinc-800 shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900"
+                className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl bg-[#1d1d1f] text-xs font-semibold text-white tap-bounce disabled:opacity-50 hover:bg-black shadow-xs cursor-pointer"
               >
                 {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <span>Buka Panel</span>}
               </button>
