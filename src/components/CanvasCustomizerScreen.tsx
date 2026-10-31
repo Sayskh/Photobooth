@@ -13,8 +13,9 @@ import {
   RotateCcw,
   LayoutTemplate,
   ChevronRight,
-  Move,
-  Layers,
+  Maximize2,
+  Copy,
+  Sparkles,
 } from "lucide-react";
 import { renderCompositeCanvas, StickerItem } from "@/lib/canvas";
 import { sounds } from "@/lib/sound";
@@ -100,6 +101,191 @@ const FILTERS = [
   },
 ];
 
+interface InteractiveStickerProps {
+  sticker: StickerItem;
+  isSelected: boolean;
+  onSelect: () => void;
+  onUpdate: (patch: Partial<StickerItem>) => void;
+  onDelete: () => void;
+  containerRef: React.RefObject<HTMLDivElement | null>;
+}
+
+function InteractiveSticker({
+  sticker,
+  isSelected,
+  onSelect,
+  onUpdate,
+  onDelete,
+  containerRef,
+}: InteractiveStickerProps) {
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartRef = useRef<{
+    startX: number;
+    startY: number;
+    origX: number;
+    origY: number;
+    hasMoved: boolean;
+  }>({ startX: 0, startY: 0, origX: 0, origY: 0, hasMoved: false });
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.button !== 0 && e.pointerType === "mouse") return;
+    e.stopPropagation();
+    onSelect();
+
+    try {
+      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    } catch {}
+
+    dragStartRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      origX: sticker.x,
+      origY: sticker.y,
+      hasMoved: false,
+    };
+    setIsDragging(true);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDragging || !containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) return;
+
+    const dx = e.clientX - dragStartRef.current.startX;
+    const dy = e.clientY - dragStartRef.current.startY;
+    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+      dragStartRef.current.hasMoved = true;
+    }
+
+    const dxPct = (dx / rect.width) * 100;
+    const dyPct = (dy / rect.height) * 100;
+
+    const nextX = Math.max(5, Math.min(95, +(dragStartRef.current.origX + dxPct).toFixed(1)));
+    const nextY = Math.max(4, Math.min(96, +(dragStartRef.current.origY + dyPct).toFixed(1)));
+
+    onUpdate({ x: nextX, y: nextY });
+  };
+
+  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (isDragging) {
+      try {
+        (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+      } catch {}
+      setIsDragging(false);
+      if (dragStartRef.current.hasMoved) {
+        sounds.playClick();
+      }
+    }
+  };
+
+  const handleQuickRotate = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    sounds.playClick();
+    onUpdate({ rotation: (sticker.rotation + 30) % 360 });
+  };
+
+  const handleQuickZoom = (e: React.MouseEvent, delta: number) => {
+    e.stopPropagation();
+    sounds.playClick();
+    onUpdate({
+      scale: Math.max(0.5, Math.min(2.4, +(sticker.scale + delta).toFixed(2))),
+    });
+  };
+
+  const handleQuickDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    sounds.playClick();
+    onDelete();
+  };
+
+  const showToolbarAbove = sticker.y >= 16;
+
+  return (
+    <div
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
+      style={{
+        left: `${sticker.x}%`,
+        top: `${sticker.y}%`,
+        transform: `translate(-50%, -50%) rotate(${sticker.rotation || 0}deg) scale(${sticker.scale || 1})`,
+        transformOrigin: "center center",
+        fontSize: "clamp(24px, 6cqi, 64px)",
+        lineHeight: 1,
+        touchAction: "none",
+        zIndex: isSelected ? 30 : 20,
+      }}
+      className={`absolute select-none cursor-grab active:cursor-grabbing transition-shadow ${
+        isDragging ? "opacity-90" : "opacity-100"
+      }`}
+      aria-label={`Stiker ${sticker.emoji}`}
+    >
+      <div
+        className={`relative flex items-center justify-center p-1.5 rounded-2xl transition-all ${
+          isSelected
+            ? "ring-2 ring-zinc-900 bg-white/40 backdrop-blur-xs shadow-md"
+            : "hover:bg-white/20"
+        }`}
+      >
+        <span>{sticker.emoji}</span>
+      </div>
+
+      {/* Floating mini tactile toolbar when selected */}
+      {isSelected && (
+        <div
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            transform: `translate(-50%, 0) rotate(${-(sticker.rotation || 0)}deg) scale(${1 / (sticker.scale || 1)})`,
+            transformOrigin: "center center",
+          }}
+          className={`absolute left-1/2 flex items-center gap-1 rounded-xl bg-white/95 p-1 shadow-lg border border-zinc-200 z-40 whitespace-nowrap ${
+            showToolbarAbove ? "-top-12" : "-bottom-12"
+          }`}
+        >
+          <button
+            type="button"
+            onClick={handleQuickRotate}
+            title="Putar 30°"
+            aria-label="Putar stiker 30 derajat"
+            className="flex h-7 w-7 items-center justify-center rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-bold tap-bounce cursor-pointer"
+          >
+            <RotateCw className="h-3.5 w-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={(e) => handleQuickZoom(e, 0.15)}
+            title="Perbesar"
+            aria-label="Perbesar stiker"
+            className="flex h-7 w-7 items-center justify-center rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-bold tap-bounce cursor-pointer"
+          >
+            <Plus className="h-3.5 w-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={(e) => handleQuickZoom(e, -0.15)}
+            title="Perkecil"
+            aria-label="Perkecil stiker"
+            className="flex h-7 w-7 items-center justify-center rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-bold tap-bounce cursor-pointer"
+          >
+            <Minus className="h-3.5 w-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={handleQuickDelete}
+            title="Hapus"
+            aria-label="Hapus stiker"
+            className="flex h-7 w-7 items-center justify-center rounded-lg bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold tap-bounce cursor-pointer"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function CanvasCustomizerScreen({
   layoutType,
   photos,
@@ -119,8 +305,10 @@ export function CanvasCustomizerScreen({
   const [selectedStickerId, setSelectedStickerId] = useState<string | null>(null);
   const [activeEmoji, setActiveEmoji] = useState<string>("🎀");
 
-  const [previewImage, setPreviewImage] = useState<string>("");
+  const [basePreviewImage, setBasePreviewImage] = useState<string>("");
   const [isRendering, setIsRendering] = useState<boolean>(false);
+
+  const sheetContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (sessionSecondsLeft <= 0) {
@@ -128,7 +316,8 @@ export function CanvasCustomizerScreen({
     }
   }, [sessionSecondsLeft, onTimeExpired]);
 
-  const updateRender = useCallback(async () => {
+  // Render clean composite base (without burned stickers) so stickers can move smoothly at 60fps
+  const updateBaseRender = useCallback(async () => {
     setIsRendering(true);
     try {
       const dataUrl = await renderCompositeCanvas({
@@ -136,26 +325,29 @@ export function CanvasCustomizerScreen({
         photos,
         filter: selectedFilter,
         frameColor: selectedFrameColor,
-        stickers,
+        stickers: [], // stickers rendered as interactive DOM elements on top
         themeStyle: selectedTheme,
         watermarkText,
       });
-      setPreviewImage(dataUrl);
+      setBasePreviewImage(dataUrl);
     } catch (err) {
       console.error("Canvas render error:", err);
     } finally {
       setIsRendering(false);
     }
-  }, [layoutType, photos, selectedFilter, selectedFrameColor, stickers, selectedTheme, watermarkText]);
+  }, [layoutType, photos, selectedFilter, selectedFrameColor, selectedTheme, watermarkText]);
 
   useEffect(() => {
-    updateRender();
-  }, [updateRender]);
+    updateBaseRender();
+  }, [updateBaseRender]);
 
-  const handleAddSticker = (emoji: string, defaultX = 50, defaultY = 50) => {
+  // Selected sticker object reference
+  const selectedSticker = stickers.find((s) => s.id === selectedStickerId) || null;
+
+  const handleAddSticker = (emoji: string, defaultX = 50, defaultY = 40) => {
     sounds.playClick();
     const newSticker: StickerItem = {
-      id: `st-${Date.now()}-${Math.random()}`,
+      id: `st-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       emoji,
       x: defaultX,
       y: defaultY,
@@ -166,63 +358,100 @@ export function CanvasCustomizerScreen({
     setSelectedStickerId(newSticker.id);
   };
 
-  const handleRotateSticker = () => {
-    if (!selectedStickerId) return;
-    sounds.playClick();
+  const handleUpdateSticker = (id: string, patch: Partial<StickerItem>) => {
     setStickers((prev) =>
-      prev.map((s) =>
-        s.id === selectedStickerId ? { ...s, rotation: (s.rotation + 20) % 360 } : s
-      )
+      prev.map((s) => (s.id === id ? { ...s, ...patch } : s))
     );
   };
 
-  const handleScaleSticker = (delta: number) => {
-    if (!selectedStickerId) return;
+  const handleDeleteSticker = (id: string) => {
     sounds.playClick();
-    setStickers((prev) =>
-      prev.map((s) =>
-        s.id === selectedStickerId
-          ? { ...s, scale: Math.max(0.6, Math.min(2.4, +(s.scale + delta).toFixed(1))) }
-          : s
-      )
-    );
+    setStickers((prev) => prev.filter((s) => s.id !== id));
+    if (selectedStickerId === id) {
+      setSelectedStickerId(null);
+    }
   };
 
-  const handleDeleteSticker = () => {
-    if (!selectedStickerId) return;
+  const handleDuplicateSticker = () => {
+    if (!selectedSticker) return;
     sounds.playClick();
-    setStickers((prev) => prev.filter((s) => s.id !== selectedStickerId));
-    setSelectedStickerId(null);
+    const newSticker: StickerItem = {
+      id: `st-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      emoji: selectedSticker.emoji,
+      x: Math.min(92, selectedSticker.x + 6),
+      y: Math.min(94, selectedSticker.y + 6),
+      scale: selectedSticker.scale,
+      rotation: selectedSticker.rotation,
+    };
+    setStickers((prev) => [...prev, newSticker]);
+    setSelectedStickerId(newSticker.id);
   };
 
-  const previewContainerRef = useRef<HTMLDivElement>(null);
-  const handlePreviewTouch = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!selectedStickerId || !previewContainerRef.current) return;
-    const rect = previewContainerRef.current.getBoundingClientRect();
-    const xPct = Math.round(((e.clientX - rect.left) / rect.width) * 100);
-    const yPct = Math.round(((e.clientY - rect.top) / rect.height) * 100);
+  const handleRotateDirect = (deg: number) => {
+    if (!selectedStickerId) return;
+    handleUpdateSticker(selectedStickerId, { rotation: deg });
+  };
 
-    setStickers((prev) =>
-      prev.map((s) =>
-        s.id === selectedStickerId
-          ? { ...s, x: Math.max(5, Math.min(95, xPct)), y: Math.max(5, Math.min(95, yPct)) }
-          : s
-      )
-    );
+  const handleRotateStep = (delta: number) => {
+    if (!selectedStickerId || !selectedSticker) return;
+    sounds.playClick();
+    let next = selectedSticker.rotation + delta;
+    if (next > 180) next -= 360;
+    if (next < -180) next += 360;
+    handleUpdateSticker(selectedStickerId, { rotation: next });
+  };
+
+  const handleScaleDirect = (scaleVal: number) => {
+    if (!selectedStickerId) return;
+    handleUpdateSticker(selectedStickerId, { scale: Math.max(0.5, Math.min(2.4, scaleVal)) });
+  };
+
+  const handleScaleStep = (delta: number) => {
+    if (!selectedStickerId || !selectedSticker) return;
+    sounds.playClick();
+    const next = Math.max(0.5, Math.min(2.4, +(selectedSticker.scale + delta).toFixed(2)));
+    handleUpdateSticker(selectedStickerId, { scale: next });
+  };
+
+  const handleQuickMoveStrip = (targetX: number) => {
+    if (!selectedStickerId) return;
+    sounds.playClick();
+    handleUpdateSticker(selectedStickerId, { x: targetX });
+  };
+
+  // If user clicks on empty space on the sheet, move selected sticker there
+  const handleSheetClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!selectedStickerId || !sheetContainerRef.current) return;
+    const rect = sheetContainerRef.current.getBoundingClientRect();
+    const clickX = Math.round(((e.clientX - rect.left) / rect.width) * 100);
+    const clickY = Math.round(((e.clientY - rect.top) / rect.height) * 100);
+
+    sounds.playClick();
+    handleUpdateSticker(selectedStickerId, {
+      x: Math.max(5, Math.min(95, clickX)),
+      y: Math.max(4, Math.min(96, clickY)),
+    });
   };
 
   const handleFinish = async () => {
     sounds.playSuccess();
-    const finalDataUrl = await renderCompositeCanvas({
-      layoutType,
-      photos,
-      filter: selectedFilter,
-      frameColor: selectedFrameColor,
-      stickers,
-      themeStyle: selectedTheme,
-      watermarkText,
-    });
-    onFinishCustomization(finalDataUrl, stickers, selectedFilter, selectedFrameColor);
+    setIsRendering(true);
+    try {
+      const finalDataUrl = await renderCompositeCanvas({
+        layoutType,
+        photos,
+        filter: selectedFilter,
+        frameColor: selectedFrameColor,
+        stickers, // Burn all final stickers at 1200x1800 300 DPI
+        themeStyle: selectedTheme,
+        watermarkText,
+      });
+      onFinishCustomization(finalDataUrl, stickers, selectedFilter, selectedFrameColor);
+    } catch (err) {
+      console.error("Error creating final composite canvas:", err);
+    } finally {
+      setIsRendering(false);
+    }
   };
 
   const mins = Math.floor(sessionSecondsLeft / 60);
@@ -272,35 +501,59 @@ export function CanvasCustomizerScreen({
       {/* Main Touch Interaction Stage */}
       <div className="flex flex-1 items-center justify-center gap-6 py-2 overflow-hidden max-w-6xl w-full mx-auto">
         {/* LEFT COLUMN: Physical Paper Printout Preview Stage */}
-        <div className="flex flex-1 h-full max-h-[76vh] flex-col items-center justify-center rounded-2xl bg-white p-4 border border-zinc-200/80 shadow-xs overflow-hidden">
-          <div className="w-full flex items-center justify-between text-xs font-mono text-zinc-600 mb-2 px-2">
+        <div className="flex flex-1 min-h-0 h-full max-h-[76vh] flex-col rounded-2xl bg-white p-4 border border-zinc-200/80 shadow-xs overflow-hidden">
+          {/* Header Bar */}
+          <div className="w-full flex-shrink-0 flex items-center justify-between text-xs font-mono text-zinc-600 mb-2 px-1">
             <span className="font-bold text-zinc-800 uppercase">
-              Pratinjau Lembar Cetak 4R Vertikal (2 Strip Fisik)
+              Pratinjau Lembar Cetak 4R (2 Strip Kembar)
             </span>
-            {selectedStickerId && (
-              <span className="text-[11px] font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-lg border border-emerald-200">
-                Mode Geser: Sentuh area foto untuk memindahkan stiker
-              </span>
-            )}
+            <span className="text-[11px] font-semibold text-zinc-600 bg-zinc-100 px-2 py-0.5 rounded-md border border-zinc-200">
+              {selectedStickerId ? "Geser stiker langsung pada foto" : "Ketuk stiker untuk mengatur"}
+            </span>
           </div>
 
+          {/* Canvas Sheet Viewport Container (Centered with min-h-0 to eliminate clipping) */}
           <div
-            ref={previewContainerRef}
-            onClick={handlePreviewTouch}
-            className="relative flex flex-1 items-center justify-center w-full overflow-hidden cursor-crosshair rounded-xl bg-zinc-100 p-2 border border-zinc-200 shadow-inner"
+            className="relative flex-1 min-h-0 w-full flex items-center justify-center overflow-hidden rounded-xl bg-zinc-100/80 p-2.5 sm:p-3 border border-zinc-200 shadow-inner"
+            onClick={() => setSelectedStickerId(null)}
           >
-            {previewImage ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={previewImage}
-                alt="Pratinjau Foto Siap Cetak"
-                className="max-h-full max-w-full rounded-lg object-contain shadow-md border border-zinc-300"
-              />
-            ) : (
-              <div className="flex items-center gap-2 text-zinc-600 font-semibold text-xs">
-                <span>Menyusun foto...</span>
-              </div>
-            )}
+            {/* The 2:3 Composite 4R Paper Sheet Wrapper */}
+            <div
+              ref={sheetContainerRef}
+              className="@container relative aspect-[2/3] h-full max-h-full max-w-full rounded-xl shadow-lg border border-zinc-300 bg-white select-none overflow-hidden"
+              style={{ touchAction: "none" }}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleSheetClick(e);
+              }}
+            >
+              {basePreviewImage ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={basePreviewImage}
+                  alt="Pratinjau Lembar Foto"
+                  className="h-full w-full object-fill pointer-events-none select-none block"
+                  draggable={false}
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center text-xs text-zinc-500 font-medium">
+                  Menyusun lembar foto...
+                </div>
+              )}
+
+              {/* OVERLAY INTERACTIVE STICKERS */}
+              {stickers.map((st) => (
+                <InteractiveSticker
+                  key={st.id}
+                  sticker={st}
+                  isSelected={st.id === selectedStickerId}
+                  onSelect={() => setSelectedStickerId(st.id)}
+                  onUpdate={(patch) => handleUpdateSticker(st.id, patch)}
+                  onDelete={() => handleDeleteSticker(st.id)}
+                  containerRef={sheetContainerRef}
+                />
+              ))}
+            </div>
           </div>
         </div>
 
@@ -409,111 +662,299 @@ export function CanvasCustomizerScreen({
               </div>
             )}
 
-            {/* TAB 2: STICKERS (WITH STRIP QUICK-PLACEMENT & TACTILE CONTROLS) */}
+            {/* TAB 2: STICKERS (SMOOTH DRAG, ZOOM SLIDER, ROTATION SLIDER & CONTROLS) */}
             {activeTab === "STICKERS" && (
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-zinc-800 uppercase tracking-wider">
-                    Pilih Stiker Dekorasi:
-                  </span>
-                  <div className="flex gap-1.5 text-[10px] font-medium text-zinc-600">
-                    <span className="bg-zinc-100 px-2 py-0.5 rounded-md border border-zinc-200">
-                      Ketuk stiker untuk pasang
-                    </span>
-                  </div>
-                </div>
-
-                {/* Sticker Grid */}
-                <div className="grid grid-cols-4 gap-2 max-h-[28vh] overflow-y-auto p-2 bg-zinc-50 rounded-xl border border-zinc-200">
-                  {STICKER_LIST.map((emoji, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => {
-                        setActiveEmoji(emoji);
-                        handleAddSticker(emoji, 50, 45);
-                      }}
-                      className={`flex min-h-[48px] items-center justify-center rounded-xl bg-white border text-2xl hover:bg-zinc-100 tap-bounce shadow-2xs transition focus-visible:outline-none cursor-pointer ${
-                        activeEmoji === emoji ? "border-[#1d1d1f] ring-2 ring-zinc-900" : "border-zinc-200"
-                      }`}
-                      aria-label={`Pilih stiker ${emoji}`}
-                    >
-                      {emoji}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Quick Strip-Placement Shortcuts */}
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => handleAddSticker(activeEmoji, 25, 40)}
-                    className="flex-1 flex min-h-[40px] items-center justify-center gap-1 text-[11px] font-semibold text-zinc-800 bg-zinc-100 hover:bg-zinc-200 rounded-xl border border-zinc-200 transition tap-bounce cursor-pointer"
-                  >
-                    <span>Pasang di Strip 1 (Kiri)</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleAddSticker(activeEmoji, 75, 40)}
-                    className="flex-1 flex min-h-[40px] items-center justify-center gap-1 text-[11px] font-semibold text-zinc-800 bg-zinc-100 hover:bg-zinc-200 rounded-xl border border-zinc-200 transition tap-bounce cursor-pointer"
-                  >
-                    <span>Pasang di Strip 2 (Kanan)</span>
-                  </button>
-                </div>
-
-                {/* Active Sticker Manipulator Bar */}
-                {selectedStickerId && (
-                  <div className="rounded-xl bg-zinc-50 p-3 border border-zinc-200">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-[11px] font-semibold text-zinc-900 flex items-center gap-1">
-                        <Move className="h-3 w-3 text-zinc-600" />
-                        <span>Atur Ukuran & Rotasi:</span>
-                      </span>
-                      <span className="text-[10px] text-zinc-500 font-normal">
-                        Sentuh foto untuk geser
-                      </span>
+                {/* Active Sticker Customization Controls */}
+                {selectedSticker ? (
+                  <div className="space-y-3">
+                    {/* Selected Sticker Header Bar */}
+                    <div className="flex items-center justify-between bg-zinc-100/90 px-3 py-2 rounded-xl border border-zinc-200">
+                      <div className="flex items-center gap-2">
+                        <span className="text-2xl">{selectedSticker.emoji}</span>
+                        <div>
+                          <span className="text-xs font-bold text-zinc-900 block leading-tight">
+                            Stiker Terpilih
+                          </span>
+                          <span className="text-[10px] text-zinc-600 font-medium">
+                            Seret stiker pada foto untuk geser
+                          </span>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedStickerId(null)}
+                        className="text-[11px] font-semibold text-zinc-700 hover:text-zinc-900 bg-white px-2.5 py-1 rounded-lg border border-zinc-200 tap-bounce shadow-2xs cursor-pointer"
+                      >
+                        Selesai
+                      </button>
                     </div>
 
-                    <div className="flex items-center justify-between gap-1.5">
+                    {/* 1. Zoom / Scale Slider & Presets */}
+                    <div className="rounded-xl bg-zinc-50 p-3 border border-zinc-200 space-y-2">
+                      <div className="flex items-center justify-between text-xs font-bold text-zinc-800">
+                        <span className="flex items-center gap-1.5">
+                          <Maximize2 className="h-3.5 w-3.5 text-zinc-700" />
+                          <span>Ukuran Stiker (Zoom)</span>
+                        </span>
+                        <span className="font-mono text-zinc-700 font-semibold bg-white px-2 py-0.5 rounded-md border border-zinc-200">
+                          {Math.round(selectedSticker.scale * 100)}%
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleScaleStep(-0.1)}
+                          aria-label="Perkecil stiker"
+                          className="flex min-h-[38px] min-w-[38px] items-center justify-center rounded-lg bg-white border border-zinc-200 text-zinc-800 hover:bg-zinc-100 tap-bounce shadow-2xs cursor-pointer"
+                        >
+                          <Minus className="h-3.5 w-3.5" />
+                        </button>
+
+                        <input
+                          type="range"
+                          min="0.5"
+                          max="2.4"
+                          step="0.05"
+                          value={selectedSticker.scale}
+                          onChange={(e) => handleScaleDirect(parseFloat(e.target.value))}
+                          aria-label="Geser ukuran stiker"
+                          className="flex-1 h-2 rounded-lg bg-zinc-200 accent-[#1d1d1f] cursor-pointer"
+                        />
+
+                        <button
+                          type="button"
+                          onClick={() => handleScaleStep(0.1)}
+                          aria-label="Perbesar stiker"
+                          className="flex min-h-[38px] min-w-[38px] items-center justify-center rounded-lg bg-white border border-zinc-200 text-zinc-800 hover:bg-zinc-100 tap-bounce shadow-2xs cursor-pointer"
+                        >
+                          <Plus className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-4 gap-1 pt-0.5">
+                        {[
+                          { label: "Kecil", val: 0.75 },
+                          { label: "Sedang", val: 1.0 },
+                          { label: "Besar", val: 1.4 },
+                          { label: "Ekstra", val: 1.9 },
+                        ].map((pr) => (
+                          <button
+                            key={pr.label}
+                            type="button"
+                            onClick={() => handleScaleDirect(pr.val)}
+                            className={`py-1 rounded-lg text-[10px] font-semibold border transition tap-bounce cursor-pointer ${
+                              Math.abs(selectedSticker.scale - pr.val) < 0.08
+                                ? "bg-[#1d1d1f] text-white border-zinc-900 shadow-2xs"
+                                : "bg-white text-zinc-700 border-zinc-200 hover:bg-zinc-100"
+                            }`}
+                          >
+                            {pr.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* 2. Rotation Slider & Presets */}
+                    <div className="rounded-xl bg-zinc-50 p-3 border border-zinc-200 space-y-2">
+                      <div className="flex items-center justify-between text-xs font-bold text-zinc-800">
+                        <span className="flex items-center gap-1.5">
+                          <RotateCw className="h-3.5 w-3.5 text-zinc-700" />
+                          <span>Putar Stiker (Rotasi)</span>
+                        </span>
+                        <span className="font-mono text-zinc-700 font-semibold bg-white px-2 py-0.5 rounded-md border border-zinc-200">
+                          {selectedSticker.rotation}°
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleRotateStep(-15)}
+                          aria-label="Putar kiri 15 derajat"
+                          className="flex min-h-[38px] min-w-[38px] items-center justify-center rounded-lg bg-white border border-zinc-200 text-zinc-800 hover:bg-zinc-100 tap-bounce shadow-2xs cursor-pointer"
+                        >
+                          <RotateCcw className="h-3.5 w-3.5" />
+                        </button>
+
+                        <input
+                          type="range"
+                          min="-180"
+                          max="180"
+                          step="5"
+                          value={selectedSticker.rotation}
+                          onChange={(e) => handleRotateDirect(parseInt(e.target.value, 10))}
+                          aria-label="Geser sudut putaran stiker"
+                          className="flex-1 h-2 rounded-lg bg-zinc-200 accent-[#1d1d1f] cursor-pointer"
+                        />
+
+                        <button
+                          type="button"
+                          onClick={() => handleRotateStep(15)}
+                          aria-label="Putar kanan 15 derajat"
+                          className="flex min-h-[38px] min-w-[38px] items-center justify-center rounded-lg bg-white border border-zinc-200 text-zinc-800 hover:bg-zinc-100 tap-bounce shadow-2xs cursor-pointer"
+                        >
+                          <RotateCw className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-4 gap-1 pt-0.5">
+                        {[
+                          { label: "-45°", val: -45 },
+                          { label: "0° Tegak", val: 0 },
+                          { label: "+45°", val: 45 },
+                          { label: "+90°", val: 90 },
+                        ].map((pr) => (
+                          <button
+                            key={pr.label}
+                            type="button"
+                            onClick={() => handleRotateDirect(pr.val)}
+                            className={`py-1 rounded-lg text-[10px] font-semibold border transition tap-bounce cursor-pointer ${
+                              selectedSticker.rotation === pr.val
+                                ? "bg-[#1d1d1f] text-white border-zinc-900 shadow-2xs"
+                                : "bg-white text-zinc-700 border-zinc-200 hover:bg-zinc-100"
+                            }`}
+                          >
+                            {pr.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* 3. Action Buttons (Position Shortcut, Duplicate, Delete) */}
+                    <div className="flex gap-2">
                       <button
                         type="button"
-                        onClick={handleRotateSticker}
-                        aria-label="Putar stiker"
-                        className="flex min-h-[44px] min-w-[44px] flex-1 items-center justify-center gap-1 rounded-xl bg-white border border-zinc-200 text-xs font-semibold text-zinc-800 hover:bg-zinc-100 tap-bounce shadow-2xs cursor-pointer"
+                        onClick={() => handleQuickMoveStrip(25)}
+                        className="flex-1 flex min-h-[40px] items-center justify-center gap-1 rounded-xl bg-white border border-zinc-200 text-[11px] font-semibold text-zinc-800 hover:bg-zinc-50 tap-bounce shadow-2xs cursor-pointer"
                       >
-                        <RotateCw className="h-3.5 w-3.5 text-zinc-700" />
-                        <span>Putar</span>
+                        <span>Ke Strip 1 (Kiri)</span>
                       </button>
 
                       <button
                         type="button"
-                        onClick={() => handleScaleSticker(0.2)}
-                        aria-label="Perbesar stiker"
-                        className="flex min-h-[44px] min-w-[44px] flex-1 items-center justify-center gap-1 rounded-xl bg-white border border-zinc-200 text-xs font-semibold text-zinc-800 hover:bg-zinc-100 tap-bounce shadow-2xs cursor-pointer"
+                        onClick={() => handleQuickMoveStrip(75)}
+                        className="flex-1 flex min-h-[40px] items-center justify-center gap-1 rounded-xl bg-white border border-zinc-200 text-[11px] font-semibold text-zinc-800 hover:bg-zinc-50 tap-bounce shadow-2xs cursor-pointer"
                       >
-                        <Plus className="h-3.5 w-3.5 text-zinc-700" />
-                        <span>Besar</span>
+                        <span>Ke Strip 2 (Kanan)</span>
+                      </button>
+                    </div>
+
+                    <div className="flex gap-2 pt-0.5">
+                      <button
+                        type="button"
+                        onClick={handleDuplicateSticker}
+                        className="flex-1 flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 border border-zinc-200 text-xs font-semibold text-zinc-900 tap-bounce cursor-pointer"
+                      >
+                        <Copy className="h-3.5 w-3.5 text-zinc-700" />
+                        <span>Duplikat</span>
                       </button>
 
                       <button
                         type="button"
-                        onClick={() => handleScaleSticker(-0.2)}
-                        aria-label="Perkecil stiker"
-                        className="flex min-h-[44px] min-w-[44px] flex-1 items-center justify-center gap-1 rounded-xl bg-white border border-zinc-200 text-xs font-semibold text-zinc-800 hover:bg-zinc-100 tap-bounce shadow-2xs cursor-pointer"
-                      >
-                        <Minus className="h-3.5 w-3.5 text-zinc-700" />
-                        <span>Kecil</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={handleDeleteSticker}
-                        aria-label="Hapus stiker"
-                        className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 tap-bounce shadow-2xs cursor-pointer"
+                        onClick={() => handleDeleteSticker(selectedSticker.id)}
+                        className="flex min-h-[44px] px-4 items-center justify-center gap-1.5 rounded-xl bg-red-50 hover:bg-red-100 border border-red-200 text-xs font-semibold text-red-700 tap-bounce cursor-pointer"
                       >
                         <Trash2 className="h-4 w-4" />
+                        <span>Hapus</span>
                       </button>
                     </div>
+
+                    {/* Mini Collapsed Sticker Picker to Add More */}
+                    <div className="pt-2 border-t border-zinc-200">
+                      <span className="text-[11px] font-semibold text-zinc-700 mb-1.5 block">
+                        Tambah Stiker Lain:
+                      </span>
+                      <div className="grid grid-cols-6 gap-1 p-1 bg-zinc-50 rounded-xl border border-zinc-200 max-h-[14vh] overflow-y-auto">
+                        {STICKER_LIST.map((emoji, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => {
+                              setActiveEmoji(emoji);
+                              handleAddSticker(emoji, 50, 40);
+                            }}
+                            className="flex min-h-[38px] items-center justify-center rounded-lg bg-white border border-zinc-200 text-xl hover:bg-zinc-100 tap-bounce shadow-2xs cursor-pointer"
+                            aria-label={`Tambah stiker ${emoji}`}
+                          >
+                            {emoji}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  /* When no sticker is selected: Show full grid & quick actions */
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-zinc-800 uppercase tracking-wider">
+                        Pilih Stiker Dekorasi:
+                      </span>
+                      <span className="text-[10px] font-medium text-zinc-600 bg-zinc-100 px-2 py-0.5 rounded-md border border-zinc-200">
+                        Ketuk untuk menempel
+                      </span>
+                    </div>
+
+                    {/* Sticker Grid */}
+                    <div className="grid grid-cols-4 gap-2 max-h-[28vh] overflow-y-auto p-2 bg-zinc-50 rounded-xl border border-zinc-200">
+                      {STICKER_LIST.map((emoji, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => {
+                            setActiveEmoji(emoji);
+                            handleAddSticker(emoji, 50, 40);
+                          }}
+                          className={`flex min-h-[48px] items-center justify-center rounded-xl bg-white border text-2xl hover:bg-zinc-100 tap-bounce shadow-2xs transition focus-visible:outline-none cursor-pointer ${
+                            activeEmoji === emoji ? "border-[#1d1d1f] ring-2 ring-zinc-900" : "border-zinc-200"
+                          }`}
+                          aria-label={`Pilih stiker ${emoji}`}
+                        >
+                          {emoji}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Quick Strip-Placement Shortcuts */}
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleAddSticker(activeEmoji, 25, 40)}
+                        className="flex-1 flex min-h-[40px] items-center justify-center gap-1 text-[11px] font-semibold text-zinc-800 bg-zinc-100 hover:bg-zinc-200 rounded-xl border border-zinc-200 transition tap-bounce cursor-pointer"
+                      >
+                        <span>Pasang di Strip 1 (Kiri)</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleAddSticker(activeEmoji, 75, 40)}
+                        className="flex-1 flex min-h-[40px] items-center justify-center gap-1 text-[11px] font-semibold text-zinc-800 bg-zinc-100 hover:bg-zinc-200 rounded-xl border border-zinc-200 transition tap-bounce cursor-pointer"
+                      >
+                        <span>Pasang di Strip 2 (Kanan)</span>
+                      </button>
+                    </div>
+
+                    {/* List of active stickers chips if any exist */}
+                    {stickers.length > 0 && (
+                      <div className="rounded-xl bg-zinc-50 p-2.5 border border-zinc-200 space-y-1.5">
+                        <span className="text-[11px] font-semibold text-zinc-700 block">
+                          Stiker Terpasang di Foto ({stickers.length}):
+                        </span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {stickers.map((st, i) => (
+                            <button
+                              key={st.id}
+                              type="button"
+                              onClick={() => setSelectedStickerId(st.id)}
+                              className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white border border-zinc-200 text-xs font-semibold text-zinc-800 hover:bg-zinc-100 tap-bounce shadow-2xs cursor-pointer"
+                            >
+                              <span>{st.emoji}</span>
+                              <span className="text-[10px] text-zinc-500">#{i + 1}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

@@ -351,7 +351,7 @@ function renderStripBrandingFooter(
     ctx.fillText(stripLabel, centerX, y + 132);
 
     ctx.font = "12px monospace";
-    ctx.fillText("KIOSKSNAP • 2026", centerX, y + 180);
+    ctx.fillText("REBOOTH • 2026", centerX, y + 180);
     ctx.fillText("AUTHENTIC STUDIO SHOT", centerX, y + 202);
 
     drawBarcode(ctx, x + 30, y + 230, w - 60, 58, blue);
@@ -478,7 +478,7 @@ function renderPostcardFooter(
   ctx.font = "14px monospace";
   ctx.globalAlpha = 0.7;
   ctx.fillText(`${collectionTitle} • ${dateStr}`, x, y + 75);
-  ctx.fillText("KIOSKSNAP SELF-SERVICE PHOTO STUDIO", x, y + 98);
+  ctx.fillText("REBOOTH SELF-SERVICE PHOTO STUDIO", x, y + 98);
 
   // Note lines
   ctx.strokeStyle = isLight ? "rgba(24, 24, 27, 0.1)" : "rgba(244, 244, 245, 0.15)";
@@ -545,6 +545,21 @@ function renderPolaroidChin(
 // THEME BACKGROUNDS & HELPERS
 // ----------------------------------------------------
 
+export const THEME_COLOR_MAP: Record<string, { bg: string; text: string; border: string }> = {
+  CLASSIC: { bg: "#FFFFFF", text: "#18181B", border: "#E4E4E7" },
+  THEATER_TICKET: { bg: "#FDF8F0", text: "#881337", border: "#881337" },
+  Y2K_CHECKER: { bg: "#1E3A8A", text: "#FFFFFF", border: "#1E3A8A" },
+  GREEN_CAFE: { bg: "#15803D", text: "#FFFFFF", border: "#15803D" },
+  POP_YELLOW: { bg: "#FACC15", text: "#18181B", border: "#18181B" },
+  FILM_NOIR: { bg: "#1C1917", text: "#F5F5F4", border: "#44403C" },
+  CHERRY_BLOSSOM: { bg: "#FFF1F2", text: "#9F1239", border: "#FDA4AF" },
+  CYBER_NEON: { bg: "#0F0B15", text: "#A855F7", border: "#7C3AED" },
+  RETRO_COMIC: { bg: "#FEF9C3", text: "#B91C1C", border: "#DC2626" },
+  SUNSET_WARM: { bg: "#FFF7ED", text: "#9A3412", border: "#FB923C" },
+  OCEAN_BREEZE: { bg: "#F0F9FF", text: "#0C4A6E", border: "#38BDF8" },
+  FOREST_MOSS: { bg: "#F0FDF4", text: "#14532D", border: "#4ADE80" },
+};
+
 function drawThemeBackground(
   ctx: CanvasRenderingContext2D,
   x: number,
@@ -554,32 +569,27 @@ function drawThemeBackground(
   themeStyle: string,
   frameColor: string
 ) {
-  if (themeStyle === "THEATER_TICKET") {
-    ctx.fillStyle = "#FDF8F0";
+  if (themeStyle === "CLASSIC") {
+    ctx.fillStyle = frameColor || "#FFFFFF";
     ctx.fillRect(x, y, w, h);
-  } else if (themeStyle === "Y2K_CHECKER") {
-    ctx.fillStyle = "#FFFFFF";
+    return;
+  }
+
+  const theme = THEME_COLOR_MAP[themeStyle];
+  if (theme) {
+    ctx.fillStyle = theme.bg;
     ctx.fillRect(x, y, w, h);
-    drawCheckerPattern(ctx, x, y, w, h, "#1E3A8A");
-  } else if (themeStyle === "GREEN_CAFE") {
-    ctx.fillStyle = "#15803D";
-    ctx.fillRect(x, y, w, h);
-  } else if (themeStyle === "POP_YELLOW") {
-    ctx.fillStyle = "#FACC15";
-    ctx.fillRect(x, y, w, h);
+    if (themeStyle === "Y2K_CHECKER") {
+      drawCheckerPattern(ctx, x, y, w, h, "#1E3A8A");
+    }
   } else {
-    // CLASSIC
     ctx.fillStyle = frameColor || "#FFFFFF";
     ctx.fillRect(x, y, w, h);
   }
 }
 
 function getThemeBaseColor(themeStyle: string): string {
-  if (themeStyle === "THEATER_TICKET") return "#FDF8F0";
-  if (themeStyle === "Y2K_CHECKER") return "#FFFFFF";
-  if (themeStyle === "GREEN_CAFE") return "#15803D";
-  if (themeStyle === "POP_YELLOW") return "#FACC15";
-  return "#FFFFFF";
+  return THEME_COLOR_MAP[themeStyle]?.bg || "#FFFFFF";
 }
 
 // Center-crop & filter helper
@@ -622,7 +632,8 @@ function drawCroppedImage(
     sX = (imgW - sWidth) / 2;
   } else {
     sHeight = imgW / slotRatio;
-    sY = (imgH - sHeight) / 2;
+    // Top-bias portrait crop: preserve head and hair instead of slicing forehead
+    sY = (imgH - sHeight) * 0.2;
   }
 
   ctx.drawImage(img, sX, sY, sWidth, sHeight, x, y, w, h);
