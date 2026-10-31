@@ -135,8 +135,6 @@ export async function renderCompositeCanvas(
       "STRIP 2 • 3-CUTS",
       3
     );
-
-    drawPerforationCutLine(ctx, stripWidth, stripHeight);
   }
 
   // ====================================================
@@ -183,8 +181,6 @@ export async function renderCompositeCanvas(
       "STRIP 2 • 4-CUTS",
       4
     );
-
-    drawPerforationCutLine(ctx, stripWidth, stripHeight);
   }
 
   // Draw Custom User Stickers on Top
@@ -283,28 +279,6 @@ function renderVerticalStrip(
     );
   }
 
-  ctx.restore();
-}
-
-function drawPerforationCutLine(
-  ctx: CanvasRenderingContext2D,
-  stripWidth: number,
-  stripHeight: number
-) {
-  ctx.save();
-  ctx.strokeStyle = "rgba(161, 161, 170, 0.45)";
-  ctx.lineWidth = 1.5;
-  ctx.setLineDash([12, 8]);
-  ctx.beginPath();
-  ctx.moveTo(stripWidth, 0);
-  ctx.lineTo(stripWidth, stripHeight);
-  ctx.stroke();
-
-  ctx.fillStyle = "rgba(113, 113, 122, 0.75)";
-  ctx.font = "bold 12px monospace";
-  ctx.textAlign = "center";
-  ctx.fillText("✄ POTONG DI SINI", stripWidth, 32);
-  ctx.fillText("✄ POTONG DI SINI", stripWidth, stripHeight - 20);
   ctx.restore();
 }
 

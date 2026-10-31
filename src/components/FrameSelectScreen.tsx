@@ -251,18 +251,18 @@ export function FrameSelectScreen({
           <div className="relative flex items-center justify-center w-full flex-1 max-h-[380px]">
             {/* 1. STRIP_2X6_3 (2x6" 3 Photo - 2 Strips Side by Side) */}
             {currentTemplate.layoutType === "STRIP_2X6_3" && (
-              <div
-                style={{ backgroundColor: getThemeBackgroundHex(), color: getThemeTextColor() }}
-                className="relative flex h-[350px] w-[234px] justify-between rounded-lg p-2 shadow-md border border-zinc-300 transition-colors duration-200"
-              >
-                {/* STRIP 1 (LEFT) */}
-                <div className="flex h-full w-[104px] flex-col justify-between gap-1">
+              <div className="flex items-center justify-center gap-3">
+                {/* STRIP 1 */}
+                <div
+                  style={{ backgroundColor: getThemeBackgroundHex(), color: getThemeTextColor() }}
+                  className="flex h-[350px] w-[112px] flex-col justify-between rounded-lg p-2 shadow-md border border-zinc-200/90 transition-colors duration-200"
+                >
                   <div className="flex flex-col gap-1 flex-1">
                     <EditorialPoseSlot poseNum={1} label="Pose 1" />
                     <EditorialPoseSlot poseNum={2} label="Pose 2" />
                     <EditorialPoseSlot poseNum={3} label="Pose 3" />
                   </div>
-                  <div className="flex w-full flex-col items-center justify-center rounded bg-black/5 p-1 border border-black/10 text-center">
+                  <div className="flex w-full flex-col items-center justify-center rounded bg-black/5 p-1 border border-black/10 text-center mt-1">
                     <span className="text-[6px] font-mono font-bold uppercase tracking-wider block opacity-75">
                       STRIP 1
                     </span>
@@ -271,22 +271,17 @@ export function FrameSelectScreen({
                   </div>
                 </div>
 
-                {/* Perforation Guideline (Vertical) */}
-                <div className="relative flex h-full flex-col items-center justify-center px-0.5">
-                  <div className="h-full border-r border-dashed border-zinc-400 opacity-60" />
-                  <span className="absolute text-[6px] font-mono text-zinc-700 bg-white px-1.5 py-0.5 rounded border border-zinc-300 shadow-2xs whitespace-nowrap font-bold">
-                    ✄ POTONG
-                  </span>
-                </div>
-
-                {/* STRIP 2 (RIGHT) */}
-                <div className="flex h-full w-[104px] flex-col justify-between gap-1">
+                {/* STRIP 2 */}
+                <div
+                  style={{ backgroundColor: getThemeBackgroundHex(), color: getThemeTextColor() }}
+                  className="flex h-[350px] w-[112px] flex-col justify-between rounded-lg p-2 shadow-md border border-zinc-200/90 transition-colors duration-200"
+                >
                   <div className="flex flex-col gap-1 flex-1">
                     <EditorialPoseSlot poseNum={1} label="Pose 1" />
                     <EditorialPoseSlot poseNum={2} label="Pose 2" />
                     <EditorialPoseSlot poseNum={3} label="Pose 3" />
                   </div>
-                  <div className="flex w-full flex-col items-center justify-center rounded bg-black/5 p-1 border border-black/10 text-center">
+                  <div className="flex w-full flex-col items-center justify-center rounded bg-black/5 p-1 border border-black/10 text-center mt-1">
                     <span className="text-[6px] font-mono font-bold uppercase tracking-wider block opacity-75">
                       STRIP 2
                     </span>
@@ -299,19 +294,19 @@ export function FrameSelectScreen({
 
             {/* 2. STRIP_2X6_4 (2x6" 4 Photo - Korean 4-Cuts) */}
             {currentTemplate.layoutType === "STRIP_2X6_4" && (
-              <div
-                style={{ backgroundColor: getThemeBackgroundHex(), color: getThemeTextColor() }}
-                className="relative flex h-[350px] w-[234px] justify-between rounded-lg p-2 shadow-md border border-zinc-300 transition-colors duration-200"
-              >
-                {/* STRIP 1 (LEFT) */}
-                <div className="flex h-full w-[104px] flex-col justify-between gap-1">
+              <div className="flex items-center justify-center gap-3">
+                {/* STRIP 1 */}
+                <div
+                  style={{ backgroundColor: getThemeBackgroundHex(), color: getThemeTextColor() }}
+                  className="flex h-[350px] w-[112px] flex-col justify-between rounded-lg p-2 shadow-md border border-zinc-200/90 transition-colors duration-200"
+                >
                   <div className="flex flex-col gap-1 flex-1">
                     <EditorialPoseSlot poseNum={1} label="Pose 1" />
                     <EditorialPoseSlot poseNum={2} label="Pose 2" />
                     <EditorialPoseSlot poseNum={3} label="Pose 3" />
                     <EditorialPoseSlot poseNum={4} label="Pose 4" />
                   </div>
-                  <div className="flex w-full flex-col items-center justify-center rounded bg-black/5 p-0.5 border border-black/10 text-center">
+                  <div className="flex w-full flex-col items-center justify-center rounded bg-black/5 p-0.5 border border-black/10 text-center mt-1">
                     <span className="text-[6px] font-mono font-bold uppercase block opacity-75">
                       4-CUTS
                     </span>
@@ -319,23 +314,18 @@ export function FrameSelectScreen({
                   </div>
                 </div>
 
-                {/* Perforation Guideline (Vertical) */}
-                <div className="relative flex h-full flex-col items-center justify-center px-0.5">
-                  <div className="h-full border-r border-dashed border-zinc-400 opacity-60" />
-                  <span className="absolute text-[6px] font-mono text-zinc-700 bg-white px-1.5 py-0.5 rounded border border-zinc-300 shadow-2xs whitespace-nowrap font-bold">
-                    ✄ POTONG
-                  </span>
-                </div>
-
-                {/* STRIP 2 (RIGHT) */}
-                <div className="flex h-full w-[104px] flex-col justify-between gap-1">
+                {/* STRIP 2 */}
+                <div
+                  style={{ backgroundColor: getThemeBackgroundHex(), color: getThemeTextColor() }}
+                  className="flex h-[350px] w-[112px] flex-col justify-between rounded-lg p-2 shadow-md border border-zinc-200/90 transition-colors duration-200"
+                >
                   <div className="flex flex-col gap-1 flex-1">
                     <EditorialPoseSlot poseNum={1} label="Pose 1" />
                     <EditorialPoseSlot poseNum={2} label="Pose 2" />
                     <EditorialPoseSlot poseNum={3} label="Pose 3" />
                     <EditorialPoseSlot poseNum={4} label="Pose 4" />
                   </div>
-                  <div className="flex w-full flex-col items-center justify-center rounded bg-black/5 p-0.5 border border-black/10 text-center">
+                  <div className="flex w-full flex-col items-center justify-center rounded bg-black/5 p-0.5 border border-black/10 text-center mt-1">
                     <span className="text-[6px] font-mono font-bold uppercase block opacity-75">
                       4-CUTS
                     </span>

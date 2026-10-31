@@ -324,7 +324,7 @@ export default function DownloadPage() {
                 </div>
                 <div>
                   <h2 className="text-sm font-bold text-zinc-900">Lembar Utuh 4R Vertikal</h2>
-                  <p className="text-[11px] text-zinc-500 font-normal">1200×1800 px @ 300 DPI (Lengkap dengan garis potong)</p>
+                  <p className="text-[11px] text-zinc-500 font-normal">1200×1800 px @ 300 DPI (Format utuh studio)</p>
                 </div>
               </div>
             </div>
