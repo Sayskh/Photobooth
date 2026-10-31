@@ -47,6 +47,9 @@ interface StatsData {
   totalRevenue: number;
 }
 
+const MINUTE_OPTIONS = Array.from({ length: 61 }, (_, i) => i);
+const STANDARD_SECOND_OPTIONS = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
+
 export function AdminModal({ isOpen, onClose, onSettingsSaved }: AdminModalProps) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [pinInput, setPinInput] = useState<string>("");
@@ -67,6 +70,11 @@ export function AdminModal({ isOpen, onClose, onSettingsSaved }: AdminModalProps
   const [watermarkText, setWatermarkText] = useState<string>("KioskSnap • Photobooth");
   const [selectedDeviceId, setSelectedDeviceId] = useState<string>("");
   const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
+
+  // Derived session duration for minutes & seconds filters
+  const timeoutMinutes = Math.floor(sessionTimeout / 60);
+  const timeoutSeconds = sessionTimeout % 60;
+  const secondOptions = Array.from(new Set([...STANDARD_SECOND_OPTIONS, timeoutSeconds])).sort((a, b) => a - b);
 
   // Stats State
   const [stats, setStats] = useState<StatsData | null>(null);
@@ -558,19 +566,51 @@ export function AdminModal({ isOpen, onClose, onSettingsSaved }: AdminModalProps
                       </div>
 
                       <div>
-                        <label htmlFor="timeoutInput" className="block text-xs font-bold text-zinc-800 mb-1.5">
-                          Batas Waktu Sesi Global (Detik)
+                        <label className="block text-xs font-bold text-zinc-800 mb-1.5">
+                          Batas Waktu Sesi Global
                         </label>
-                        <input
-                          id="timeoutInput"
-                          type="number"
-                          step={30}
-                          value={sessionTimeout}
-                          onChange={(e) => setSessionTimeout(Number(e.target.value))}
-                          className="min-h-[44px] w-full rounded-lg bg-zinc-50 border border-zinc-200 px-3 text-xs font-mono font-semibold text-zinc-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-900"
-                        />
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label htmlFor="timeoutMinutesSelect" className="sr-only">
+                              Pilih Menit
+                            </label>
+                            <select
+                              id="timeoutMinutesSelect"
+                              value={timeoutMinutes}
+                              onChange={(e) =>
+                                setSessionTimeout(Number(e.target.value) * 60 + timeoutSeconds)
+                              }
+                              className="min-h-[44px] w-full rounded-lg bg-zinc-50 border border-zinc-200 px-3 text-xs font-semibold text-zinc-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-900"
+                            >
+                              {MINUTE_OPTIONS.map((min) => (
+                                <option key={min} value={min}>
+                                  {min} Menit
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          <div>
+                            <label htmlFor="timeoutSecondsSelect" className="sr-only">
+                              Pilih Detik
+                            </label>
+                            <select
+                              id="timeoutSecondsSelect"
+                              value={timeoutSeconds}
+                              onChange={(e) =>
+                                setSessionTimeout(timeoutMinutes * 60 + Number(e.target.value))
+                              }
+                              className="min-h-[44px] w-full rounded-lg bg-zinc-50 border border-zinc-200 px-3 text-xs font-semibold text-zinc-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-900"
+                            >
+                              {secondOptions.map((sec) => (
+                                <option key={sec} value={sec}>
+                                  {sec} Detik
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
                         <span className="text-[11px] text-zinc-600 mt-1 block">
-                          {Math.floor(sessionTimeout / 60)} menit ({sessionTimeout} detik) batas waktu jepret dan kustomisasi.
+                          Total durasi: {timeoutMinutes} menit {timeoutSeconds} detik ({sessionTimeout} detik) batas waktu jepret dan kustomisasi.
                         </span>
                       </div>
                     </div>
