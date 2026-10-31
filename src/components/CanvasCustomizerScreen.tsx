@@ -308,7 +308,41 @@ export function CanvasCustomizerScreen({
   const [basePreviewImage, setBasePreviewImage] = useState<string>("");
   const [isRendering, setIsRendering] = useState<boolean>(false);
 
+  const viewportRef = useRef<HTMLDivElement>(null);
   const sheetContainerRef = useRef<HTMLDivElement>(null);
+  const [sheetSize, setSheetSize] = useState<{ width: number; height: number }>({ width: 360, height: 540 });
+
+  useEffect(() => {
+    if (!viewportRef.current) return;
+    const updateSize = (width: number, height: number) => {
+      if (width <= 0 || height <= 0) return;
+      let w = width;
+      let h = w * (3 / 2);
+      if (h > height) {
+        h = height;
+        w = h * (2 / 3);
+      }
+      setSheetSize({ width: Math.floor(w), height: Math.floor(h) });
+    };
+
+    const ro = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        updateSize(width, height);
+      }
+    });
+
+    ro.observe(viewportRef.current);
+    const rect = viewportRef.current.getBoundingClientRect();
+    if (rect.width > 0 && rect.height > 0) {
+      const style = window.getComputedStyle(viewportRef.current);
+      const padX = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0);
+      const padY = (parseFloat(style.paddingTop) || 0) + (parseFloat(style.paddingBottom) || 0);
+      updateSize(rect.width - padX, rect.height - padY);
+    }
+
+    return () => ro.disconnect();
+  }, []);
 
   useEffect(() => {
     if (sessionSecondsLeft <= 0) {
@@ -512,16 +546,21 @@ export function CanvasCustomizerScreen({
             </span>
           </div>
 
-          {/* Canvas Sheet Viewport Container (Centered with min-h-0 to eliminate clipping) */}
+          {/* Canvas Sheet Viewport Container */}
           <div
+            ref={viewportRef}
             className="relative flex-1 min-h-0 w-full flex items-center justify-center overflow-hidden rounded-xl bg-zinc-100/80 p-2.5 sm:p-3 border border-zinc-200 shadow-inner"
             onClick={() => setSelectedStickerId(null)}
           >
             {/* The 2:3 Composite 4R Paper Sheet Wrapper */}
             <div
               ref={sheetContainerRef}
-              className="@container relative aspect-[2/3] h-full max-h-full max-w-full rounded-xl shadow-lg border border-zinc-300 bg-white select-none overflow-hidden"
-              style={{ touchAction: "none" }}
+              style={{
+                width: `${sheetSize.width}px`,
+                height: `${sheetSize.height}px`,
+                touchAction: "none",
+              }}
+              className="@container relative rounded-xl shadow-lg border border-zinc-300 bg-white select-none overflow-hidden shrink-0 transition-[width,height] duration-75"
               onClick={(e) => {
                 e.stopPropagation();
                 handleSheetClick(e);
