@@ -459,9 +459,9 @@ export function CanvasCustomizerScreen({
   const timeFormatted = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
 
   return (
-    <div className="relative flex min-h-dvh flex-col justify-between studio-bg p-4 md:p-5 select-none overflow-y-auto no-scrollbar font-sans text-zinc-900">
+    <div className="relative flex h-dvh max-h-dvh flex-col justify-between studio-bg p-4 md:p-5 select-none overflow-hidden font-sans text-zinc-900">
       {/* Top Header Bar */}
-      <div className="flex items-center justify-between border-b border-zinc-200/80 pb-3">
+      <div className="flex-shrink-0 flex items-center justify-between border-b border-zinc-200/80 pb-3">
         <div className="flex items-center gap-3">
           <button
             type="button"
@@ -499,9 +499,9 @@ export function CanvasCustomizerScreen({
       </div>
 
       {/* Main Touch Interaction Stage */}
-      <div className="flex flex-1 items-center justify-center gap-6 py-2 overflow-hidden max-w-6xl w-full mx-auto">
+      <div className="flex flex-1 min-h-0 items-stretch justify-center gap-6 py-2 overflow-hidden max-w-6xl w-full mx-auto">
         {/* LEFT COLUMN: Physical Paper Printout Preview Stage */}
-        <div className="flex flex-1 min-h-0 h-full max-h-[76vh] flex-col rounded-2xl bg-white p-4 border border-zinc-200/80 shadow-xs overflow-hidden">
+        <div className="flex flex-1 min-h-0 h-full flex-col rounded-2xl bg-white p-4 border border-zinc-200/80 shadow-xs overflow-hidden">
           {/* Header Bar */}
           <div className="w-full flex-shrink-0 flex items-center justify-between text-xs font-mono text-zinc-600 mb-2 px-1">
             <span className="font-bold text-zinc-800 uppercase">
@@ -558,10 +558,10 @@ export function CanvasCustomizerScreen({
         </div>
 
         {/* RIGHT COLUMN: Touch Friendly Customizer Panel */}
-        <div className="flex h-full max-h-[76vh] w-96 flex-col justify-between rounded-2xl bg-white p-5 border border-zinc-200/80 shadow-xs">
-          <div>
+        <div className="flex h-full min-h-0 w-80 sm:w-96 flex-col justify-between rounded-2xl bg-white p-5 border border-zinc-200/80 shadow-xs">
+          <div className="flex flex-1 min-h-0 flex-col">
             {/* Tool Category Tabs */}
-            <div className="flex gap-1 rounded-xl bg-zinc-200/80 p-1 border border-zinc-200 mb-3">
+            <div className="flex-shrink-0 flex gap-1 rounded-xl bg-zinc-200/80 p-1 border border-zinc-200 mb-3">
               <button
                 type="button"
                 onClick={() => {
@@ -613,11 +613,11 @@ export function CanvasCustomizerScreen({
 
             {/* TAB 1: FILTER WARNA (WITH VISUAL SWATCH TILES) */}
             {activeTab === "FILTER" && (
-              <div className="space-y-2">
-                <span className="text-xs font-bold text-zinc-800 uppercase tracking-wider block mb-1">
+              <div className="flex flex-1 min-h-0 flex-col space-y-2">
+                <span className="text-xs font-bold text-zinc-800 uppercase tracking-wider block mb-1 flex-shrink-0">
                   Pilih Nada Warna Studio:
                 </span>
-                <div className="grid grid-cols-1 gap-2 max-h-[46vh] overflow-y-auto pr-1">
+                <div className="grid grid-cols-1 gap-2 flex-1 min-h-0 overflow-y-auto pr-1">
                   {FILTERS.map((f) => {
                     const isSelected = selectedFilter === f.id;
                     return (
@@ -664,7 +664,7 @@ export function CanvasCustomizerScreen({
 
             {/* TAB 2: STICKERS (SMOOTH DRAG, ZOOM SLIDER, ROTATION SLIDER & CONTROLS) */}
             {activeTab === "STICKERS" && (
-              <div className="space-y-3">
+              <div className="flex flex-1 min-h-0 flex-col space-y-3 overflow-y-auto pr-1">
                 {/* Active Sticker Customization Controls */}
                 {selectedSticker ? (
                   <div className="space-y-3">
@@ -962,7 +962,7 @@ export function CanvasCustomizerScreen({
 
             {/* TAB 3: THEME QUICK SWITCH */}
             {activeTab === "THEME" && (
-              <div className="space-y-2 max-h-[46vh] overflow-y-auto pr-1">
+              <div className="flex flex-1 min-h-0 flex-col space-y-2 overflow-y-auto pr-1">
                 <span className="text-xs font-bold text-zinc-800 uppercase tracking-wider block mb-1">
                   Ubah Desain Frame Instan:
                 </span>
@@ -1021,7 +1021,7 @@ export function CanvasCustomizerScreen({
           </div>
 
           {/* FINISH & PRINT CTA BUTTON */}
-          <div className="pt-2">
+          <div className="pt-2 flex-shrink-0">
             <button
               type="button"
               onClick={handleFinish}
