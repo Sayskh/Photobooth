@@ -8,11 +8,11 @@ export async function GET() {
       booth = await prisma.booth.create({
         data: {
           name: "Booth Kiosk 1",
-          storeName: "KioskSnap Studio",
+          storeName: "Rebooth Studio",
           price: 30000,
           includedPrints: 2,
           sessionTimeout: 480,
-          watermarkText: "KioskSnap • Photobooth",
+          watermarkText: "Rebooth • Photobooth",
           isActive: true,
         },
       });

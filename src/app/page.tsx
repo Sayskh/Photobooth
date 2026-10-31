@@ -32,11 +32,11 @@ interface BoothConfig {
 
 const DEFAULT_BOOTH_CONFIG: BoothConfig = {
   name: "Booth Utama",
-  storeName: "KioskSnap Studio",
+  storeName: "Rebooth Studio",
   price: 30000,
   includedPrints: 2,
   sessionTimeout: 480,
-  watermarkText: "KioskSnap • Photobooth",
+  watermarkText: "Rebooth • Photobooth",
   cameraDeviceId: null,
 };
 
@@ -70,11 +70,11 @@ export default function PhotoboothKiosk() {
       if (data.success && data.booth) {
         setBoothConfig({
           name: data.booth.name || "Booth Utama",
-          storeName: data.booth.storeName || "KioskSnap Studio",
+          storeName: data.booth.storeName || "Rebooth Studio",
           price: Number(data.booth.price) || 30000,
           includedPrints: Number(data.booth.includedPrints) || 2,
           sessionTimeout: Number(data.booth.sessionTimeout) || 480,
-          watermarkText: data.booth.watermarkText || "KioskSnap • Photobooth",
+          watermarkText: data.booth.watermarkText || "Rebooth • Photobooth",
           cameraDeviceId: data.booth.cameraDeviceId || null,
         });
       }
@@ -346,25 +346,32 @@ export default function PhotoboothKiosk() {
       />
 
       {showTimeWarning && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 backdrop-blur-md p-4">
-          <div className="flex flex-col items-center gap-4 rounded-3xl bg-white/95 backdrop-blur-md p-8 shadow-2xl border border-rose-200 max-w-sm text-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-200 to-rose-200 text-rose-800 shadow-xs">
-              <Clock className="h-8 w-8" />
+        <div
+          role="alertdialog"
+          aria-modal="true"
+          aria-labelledby="time-warning-title"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4"
+        >
+          <div className="flex flex-col items-center gap-3.5 rounded-2xl bg-white p-7 shadow-xl border border-zinc-200 max-w-sm text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-100 text-zinc-900 border border-zinc-200">
+              <Clock className="h-6 w-6" />
             </div>
-            <h3 className="text-xl font-black text-zinc-900">Waktu Hampir Habis!</h3>
-            <p className="text-xs text-zinc-600 font-medium leading-relaxed">
-              Tersisa <strong className="text-rose-600 font-black">{sessionSecondsLeft} detik</strong> lagi. Sesi akan otomatis memproses dan mencetak foto Anda.
+            <h3 id="time-warning-title" className="text-lg font-bold text-zinc-900">
+              Sesi Hampir Selesai
+            </h3>
+            <p className="text-xs text-zinc-600 font-normal leading-relaxed">
+              Tersisa <strong className="text-zinc-900 font-semibold">{sessionSecondsLeft} detik</strong>. Sistem akan melanjutkan otomatis ke proses cetak jika waktu habis.
             </p>
-            <div className="flex w-full gap-2.5 pt-1">
+            <div className="flex w-full gap-2 pt-2">
               <button
                 type="button"
                 onClick={() => {
                   setSessionSecondsLeft(prev => prev + 30);
                   setShowTimeWarning(false);
                 }}
-                className="flex-1 min-h-[48px] rounded-xl bg-zinc-100 text-xs font-semibold text-zinc-800 border border-zinc-200 hover:bg-zinc-200 tap-bounce cursor-pointer"
+                className="flex-1 min-h-[44px] rounded-xl bg-zinc-100 text-xs font-semibold text-zinc-800 border border-zinc-200 hover:bg-zinc-200 tap-bounce focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 cursor-pointer"
               >
-                +30 Detik
+                Tambah 30 Detik
               </button>
               <button
                 type="button"
@@ -372,9 +379,9 @@ export default function PhotoboothKiosk() {
                   setShowTimeWarning(false);
                   handleTimeExpired();
                 }}
-                className="flex-1 min-h-[48px] rounded-xl bg-[#1d1d1f] text-xs font-semibold text-white shadow-xs tap-bounce hover:bg-black cursor-pointer"
+                className="flex-1 min-h-[44px] rounded-xl bg-[#1d1d1f] text-xs font-semibold text-white shadow-xs tap-bounce hover:bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 cursor-pointer"
               >
-                Selesai Sekarang
+                Lanjut Sekarang
               </button>
             </div>
           </div>

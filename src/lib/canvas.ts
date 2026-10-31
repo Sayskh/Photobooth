@@ -68,7 +68,7 @@ export async function renderCompositeCanvas(
     filter,
     frameColor,
     stickers = [],
-    watermarkText = "KioskSnap • Photobooth",
+    watermarkText = "Rebooth • Photobooth",
     themeStyle = "CLASSIC",
   } = options;
 

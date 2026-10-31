@@ -32,11 +32,11 @@ model Voucher {
 model Booth {
   id             String    @id @default(uuid())
   name           String    @default("Booth Utama")
-  storeName      String    @default("KioskSnap Studio")
+  storeName      String    @default("Rebooth Studio")
   price          Int       @default(30000)
   includedPrints Int       @default(2)
   sessionTimeout Int       @default(480)
-  watermarkText  String    @default("KioskSnap • Photobooth")
+  watermarkText  String    @default("Rebooth • Photobooth")
   cameraDeviceId String?
   sessions       Session[]
   isActive       Boolean   @default(true)

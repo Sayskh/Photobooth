@@ -23,11 +23,11 @@ export async function GET(req: Request) {
       booth = await prisma.booth.create({
         data: {
           name: "Booth Kiosk 1",
-          storeName: "KioskSnap Studio",
+          storeName: "Rebooth Studio",
           price: 30000,
           includedPrints: 2,
           sessionTimeout: 480,
-          watermarkText: "KioskSnap • Photobooth",
+          watermarkText: "Rebooth • Photobooth",
           isActive: true,
         },
       });
@@ -80,11 +80,11 @@ export async function PATCH(req: Request) {
       booth = await prisma.booth.create({
         data: {
           name: name || "Booth Kiosk 1",
-          storeName: storeName || "KioskSnap Studio",
+          storeName: storeName || "Rebooth Studio",
           price: price !== undefined ? price : 30000,
           includedPrints: includedPrints !== undefined ? includedPrints : 2,
           sessionTimeout: sessionTimeout !== undefined ? sessionTimeout : 480,
-          watermarkText: watermarkText || "KioskSnap • Photobooth",
+          watermarkText: watermarkText || "Rebooth • Photobooth",
           cameraDeviceId: cameraDeviceId || null,
         },
       });

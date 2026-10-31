@@ -199,7 +199,7 @@ export function PrintOutputScreen({
                   />
                 </div>
               ) : (
-                <div className="mb-2 w-36 h-36 aspect-square flex items-center justify-center rounded-xl bg-white p-2.5 border border-zinc-200 shadow-xs text-xs text-zinc-400 font-semibold">
+                <div className="mb-2 w-36 h-36 aspect-square flex items-center justify-center rounded-xl bg-white p-2.5 border border-zinc-200 shadow-xs text-xs text-zinc-500 font-semibold">
                   Membuat QR...
                 </div>
               )}
@@ -213,7 +213,7 @@ export function PrintOutputScreen({
 
         {/* Bottom Note */}
         <div className="text-center text-xs font-normal text-zinc-500">
-          Terima kasih telah berfoto di KioskSnap! Sesi akan otomatis berakhir dalam {countdown} detik.
+          Terima kasih telah berfoto di Rebooth! Sesi akan otomatis berakhir dalam {countdown} detik.
         </div>
       </div>
     </>

@@ -266,7 +266,7 @@ export function FrameSelectScreen({
                     <span className="text-[6px] font-mono font-bold uppercase tracking-wider block opacity-75">
                       STRIP 1
                     </span>
-                    <span className="text-[8px] font-bold block leading-tight">KIOSKSNAP</span>
+                    <span className="text-[8px] font-bold block leading-tight">REBOOTH</span>
                     <span className="text-[5px] font-mono opacity-60 block">300 DPI</span>
                   </div>
                 </div>
@@ -290,7 +290,7 @@ export function FrameSelectScreen({
                     <span className="text-[6px] font-mono font-bold uppercase tracking-wider block opacity-75">
                       STRIP 2
                     </span>
-                    <span className="text-[8px] font-bold block leading-tight">KIOSKSNAP</span>
+                    <span className="text-[8px] font-bold block leading-tight">REBOOTH</span>
                     <span className="text-[5px] font-mono opacity-60 block">300 DPI</span>
                   </div>
                 </div>
@@ -315,7 +315,7 @@ export function FrameSelectScreen({
                     <span className="text-[6px] font-mono font-bold uppercase block opacity-75">
                       4-CUTS
                     </span>
-                    <span className="text-[7px] font-bold block leading-tight">KIOSKSNAP</span>
+                    <span className="text-[7px] font-bold block leading-tight">REBOOTH</span>
                   </div>
                 </div>
 
@@ -339,7 +339,7 @@ export function FrameSelectScreen({
                     <span className="text-[6px] font-mono font-bold uppercase block opacity-75">
                       4-CUTS
                     </span>
-                    <span className="text-[7px] font-bold block leading-tight">KIOSKSNAP</span>
+                    <span className="text-[7px] font-bold block leading-tight">REBOOTH</span>
                   </div>
                 </div>
               </div>

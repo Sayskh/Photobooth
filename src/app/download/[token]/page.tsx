@@ -84,11 +84,11 @@ export default function DownloadPage() {
     if (strips) {
       queue.push({
         url: strips.strip1,
-        name: `KioskSnap-Strip-1-${token.slice(0, 6)}.png`,
+        name: `Rebooth-Strip-1-${token.slice(0, 6)}.png`,
       });
       queue.push({
         url: strips.strip2,
-        name: `KioskSnap-Strip-2-${token.slice(0, 6)}.png`,
+        name: `Rebooth-Strip-2-${token.slice(0, 6)}.png`,
       });
     }
 
@@ -96,7 +96,7 @@ export default function DownloadPage() {
     if (data.compositeImage) {
       queue.push({
         url: data.compositeImage,
-        name: `KioskSnap-Lembar-4R-${token.slice(0, 6)}.png`,
+        name: `Rebooth-Lembar-4R-${token.slice(0, 6)}.png`,
       });
     }
 
@@ -105,12 +105,12 @@ export default function DownloadPage() {
       data.shots.forEach((s) => {
         queue.push({
           url: s.image,
-          name: `KioskSnap-Pose-${s.poseIndex}-${token.slice(0, 6)}.jpg`,
+          name: `Rebooth-Pose-${s.poseIndex}-${token.slice(0, 6)}.jpg`,
         });
         if (s.liveVideo) {
           queue.push({
             url: s.liveVideo,
-            name: `KioskSnap-Live-Pose-${s.poseIndex}-${token.slice(0, 6)}.mp4`,
+            name: `Rebooth-Live-Pose-${s.poseIndex}-${token.slice(0, 6)}.mp4`,
           });
         }
       });
@@ -120,7 +120,7 @@ export default function DownloadPage() {
     if (data.videoMontageUrl) {
       queue.push({
         url: data.videoMontageUrl,
-        name: `KioskSnap-Animasi-Live-${token.slice(0, 6)}.mp4`,
+        name: `Rebooth-Animasi-Live-${token.slice(0, 6)}.mp4`,
       });
     }
 
@@ -149,10 +149,10 @@ export default function DownloadPage() {
       <div className="flex flex-col items-center text-center mb-6 max-w-md w-full">
         <div className="flex items-center gap-2 rounded-xl bg-white px-3.5 py-1.5 text-xs font-semibold text-zinc-700 border border-zinc-200 mb-3 shadow-xs">
           <Camera className="h-3.5 w-3.5 text-zinc-800" />
-          <span>KioskSnap Photobooth</span>
+          <span>Rebooth Studio</span>
         </div>
         <h1 className="text-2xl font-bold tracking-tight text-zinc-900 md:text-3xl">
-          Unduh Foto & Video Anda
+          Unduh Foto dan Video
         </h1>
         <p className="text-xs text-zinc-600 font-normal mt-1.5 leading-relaxed">
           Simpan hasil strip foto mandiri, lembar cetak utuh 4R, dan seluruh Live Photo video resolusi tinggi langsung ke galeri smartphone.
@@ -231,7 +231,7 @@ export default function DownloadPage() {
                   <button
                     type="button"
                     onClick={() =>
-                      handleDownload(strips.strip1, `KioskSnap-Strip-1-${token.slice(0, 6)}.png`)
+                      handleDownload(strips.strip1, `Rebooth-Strip-1-${token.slice(0, 6)}.png`)
                     }
                     className="flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-lg bg-[#1d1d1f] text-xs font-semibold text-white shadow-xs tap-bounce hover:bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 cursor-pointer"
                   >
@@ -253,7 +253,7 @@ export default function DownloadPage() {
                   <button
                     type="button"
                     onClick={() =>
-                      handleDownload(strips.strip2, `KioskSnap-Strip-2-${token.slice(0, 6)}.png`)
+                      handleDownload(strips.strip2, `Rebooth-Strip-2-${token.slice(0, 6)}.png`)
                     }
                     className="flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-lg bg-[#1d1d1f] text-xs font-semibold text-white shadow-xs tap-bounce hover:bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 cursor-pointer"
                   >
@@ -304,7 +304,7 @@ export default function DownloadPage() {
                 onClick={() =>
                   handleDownload(
                     data.videoMontageUrl!,
-                    `KioskSnap-Animasi-Live-${token.slice(0, 6)}.mp4`
+                    `Rebooth-Animasi-Live-${token.slice(0, 6)}.mp4`
                   )
                 }
                 className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-lg bg-[#1d1d1f] font-semibold text-xs text-white shadow-xs tap-bounce hover:bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 cursor-pointer"
@@ -341,7 +341,7 @@ export default function DownloadPage() {
             <button
               type="button"
               onClick={() =>
-                handleDownload(data.compositeImage, `KioskSnap-Lembar-4R-${token.slice(0, 6)}.png`)
+                handleDownload(data.compositeImage, `Rebooth-Lembar-4R-${token.slice(0, 6)}.png`)
               }
               className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-lg bg-[#1d1d1f] font-semibold text-xs text-white shadow-xs tap-bounce hover:bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 cursor-pointer"
             >
@@ -405,7 +405,7 @@ export default function DownloadPage() {
                         onClick={() =>
                           handleDownload(
                             s.image,
-                            `KioskSnap-Pose-${s.poseIndex}-${token.slice(0, 6)}.jpg`
+                            `Rebooth-Pose-${s.poseIndex}-${token.slice(0, 6)}.jpg`
                           )
                         }
                         className="flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-lg bg-white text-[11px] font-semibold text-zinc-800 border border-zinc-200 transition tap-bounce hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 shadow-2xs cursor-pointer"
@@ -420,7 +420,7 @@ export default function DownloadPage() {
                           onClick={() =>
                             handleDownload(
                               s.liveVideo!,
-                              `KioskSnap-Live-Pose-${s.poseIndex}-${token.slice(0, 6)}.mp4`
+                              `Rebooth-Live-Pose-${s.poseIndex}-${token.slice(0, 6)}.mp4`
                             )
                           }
                           className="flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-lg bg-zinc-100 text-[11px] font-semibold text-zinc-800 border border-zinc-200 transition tap-bounce hover:bg-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 shadow-2xs cursor-pointer"
@@ -440,7 +440,7 @@ export default function DownloadPage() {
           <div className="text-center text-xs text-zinc-500 mt-2 font-medium">
             Foto diambil pada: {new Date(data.createdAt).toLocaleString("id-ID")}
             <br />
-            KioskSnap • Self-Service Photobooth IMK
+            Rebooth • Self-Service Photobooth IMK
           </div>
         </div>
       )}

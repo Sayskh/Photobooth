@@ -100,14 +100,14 @@ export async function POST(req: Request) {
       },
     });
 
-    const storeName = booth?.storeName || "KioskSnap Photobooth";
+    const storeName = booth?.storeName || "Rebooth Photobooth";
     const receiptData = {
       storeName,
       receiptNo: `TRX-${Date.now().toString().slice(-6)}`,
       date: new Date().toLocaleString("id-ID"),
       voucherCode: voucher.code,
       nominal: `Rp ${voucher.amount.toLocaleString("id-ID")}`,
-      instructions: "Ketik kode 6-digit di atas pada layar anjungan photobooth.",
+      instructions: "Ketik kode voucher di atas pada layar anjungan photobooth.",
     };
 
     return NextResponse.json({

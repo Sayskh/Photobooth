@@ -1,4 +1,4 @@
-# DESIGN.md - KioskSnap Studio
+# DESIGN.md - Rebooth Studio
 
 ## Product Context & Identity
 - **Product**: Self-service touchscreen photobooth kiosk for a local cozy cafe.

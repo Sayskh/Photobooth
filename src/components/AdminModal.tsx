@@ -62,12 +62,12 @@ export function AdminModal({ isOpen, onClose, onSettingsSaved }: AdminModalProps
   const [generatedReceipt, setGeneratedReceipt] = useState<ThermalReceipt | null>(null);
 
   // Settings State
-  const [storeName, setStoreName] = useState<string>("KioskSnap Studio");
+  const [storeName, setStoreName] = useState<string>("Rebooth Studio");
   const [boothName, setBoothName] = useState<string>("Booth Kiosk 1");
   const [price, setPrice] = useState<number>(30000);
   const [includedPrints, setIncludedPrints] = useState<number>(2);
   const [sessionTimeout, setSessionTimeout] = useState<number>(480);
-  const [watermarkText, setWatermarkText] = useState<string>("KioskSnap • Photobooth");
+  const [watermarkText, setWatermarkText] = useState<string>("Rebooth • Photobooth");
   const [selectedDeviceId, setSelectedDeviceId] = useState<string>("");
   const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
 
@@ -260,7 +260,7 @@ export function AdminModal({ isOpen, onClose, onSettingsSaved }: AdminModalProps
               <Lock className="h-4 w-4" />
             </div>
             <span className="text-base font-bold text-zinc-900">
-              Panel Kasir dan Administrasi KioskSnap
+              Panel Kasir dan Administrasi Rebooth
             </span>
           </div>
 
@@ -506,7 +506,7 @@ export function AdminModal({ isOpen, onClose, onSettingsSaved }: AdminModalProps
                           type="text"
                           value={storeName}
                           onChange={(e) => setStoreName(e.target.value)}
-                          placeholder="Contoh: KioskSnap Studio • Kopi Senja"
+                          placeholder="Contoh: Rebooth Studio • Kopi Senja"
                           className="min-h-[44px] w-full rounded-lg bg-zinc-50 border border-zinc-200 px-3 text-xs text-zinc-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-900"
                         />
                         <span className="text-[11px] text-zinc-600 mt-1 block">
@@ -523,7 +523,7 @@ export function AdminModal({ isOpen, onClose, onSettingsSaved }: AdminModalProps
                           type="text"
                           value={watermarkText}
                           onChange={(e) => setWatermarkText(e.target.value)}
-                          placeholder="Contoh: KioskSnap • Photobooth"
+                          placeholder="Contoh: Rebooth • Photobooth"
                           className="min-h-[44px] w-full rounded-lg bg-zinc-50 border border-zinc-200 px-3 text-xs text-zinc-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-900"
                         />
                         <span className="text-[11px] text-zinc-600 mt-1 block">
