@@ -131,7 +131,7 @@ export function PrintOutputScreen({
         {/* Center Grid: Left Final Photo, Right Auto Print Status & QR */}
         <div className="flex flex-col md:flex-row flex-1 items-center justify-center gap-4 md:gap-8 py-2 md:py-4">
           {/* Photo Preview Frame */}
-          <div className="flex max-h-[50vh] md:max-h-[70vh] items-center justify-center rounded-2xl bg-white p-4 border border-zinc-200/80 shadow-xs">
+          <div className="flex max-h-[50vh] md:max-h-[70vh] max-w-[280px] md:max-w-[340px] items-center justify-center rounded-2xl bg-white p-3 border border-zinc-200/80 shadow-xs shrink-0">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={finalImage}

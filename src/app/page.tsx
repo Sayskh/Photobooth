@@ -63,7 +63,10 @@ export default function PhotoboothKiosk() {
   const loadBoothConfig = useCallback(async () => {
     try {
       const res = await fetch("/api/booth");
-      const data = await res.json();
+      if (!res.ok) throw new Error(`booth fetch ${res.status}`);
+      const text = await res.text();
+      if (!text) throw new Error("booth response empty");
+      const data = JSON.parse(text);
       if (data.success && data.booth) {
         setBoothConfig({
           name: data.booth.name || "Booth Utama",
@@ -123,9 +126,13 @@ export default function PhotoboothKiosk() {
             videoMontageUrl: videoMontageUrl || null,
           }),
         });
-        const data = await res.json();
-        if (data.success) {
-          setQrToken(data.qrDownloadToken);
+        if (!res.ok) throw new Error(`composite save ${res.status}`);
+        const text = await res.text();
+        if (text) {
+          const data = JSON.parse(text);
+          if (data.success) {
+            setQrToken(data.qrDownloadToken);
+          }
         }
       } catch (e) {
         console.error("Save composite error:", e);
