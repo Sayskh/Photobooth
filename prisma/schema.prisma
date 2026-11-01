@@ -1,0 +1,115 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model AdminUser {
+  id           String    @id @default(uuid())
+  username     String    @unique
+  passwordHash String
+  role         String    @default("CASHIER") // ADMIN, CASHIER
+  vouchers     Voucher[]
+  createdAt    DateTime  @default(now())
+}
+
+model Voucher {
+  id          String       @id @default(uuid())
+  code        String       @unique // 6-digit alphanum unik (e.g. KS-8921)
+  amount      Int          @default(30000)
+  isUsed      Boolean      @default(false)
+  usedAt      DateTime?
+  expiresAt   DateTime
+  createdById String
+  createdBy   AdminUser    @relation(fields: [createdById], references: [id])
+  transaction Transaction?
+  createdAt   DateTime     @default(now())
+}
+
+model Booth {
+  id             String    @id @default(uuid())
+  name           String    @default("Booth Utama")
+  storeName      String    @default("Rebooth Studio")
+  price          Int       @default(30000)
+  includedPrints Int       @default(2)
+  sessionTimeout Int       @default(480)
+  watermarkText  String    @default("Rebooth • Photobooth")
+  cameraDeviceId String?
+  sessions       Session[]
+  isActive       Boolean   @default(true)
+}
+
+model Session {
+  id            String          @id @default(uuid())
+  boothId       String
+  booth         Booth           @relation(fields: [boothId], references: [id])
+  status        String          @default("AWAITING_PAYMENT") // AWAITING_PAYMENT, FRAME_SELECT, CAPTURING, EDITING, PRINTING, COMPLETED, ABANDONED
+  transaction   Transaction?
+  photoShots    PhotoShot[]
+  customization PhotoComposite?
+  printJobs     PrintJob[]
+  startedAt     DateTime        @default(now())
+  completedAt   DateTime?
+}
+
+model Transaction {
+  id        String    @id @default(uuid())
+  sessionId String    @unique
+  session   Session   @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  method    String    // CASH_VOUCHER, QRIS
+  amount    Int
+  status    String    @default("PENDING") // PENDING, PAID, EXPIRED, FAILED
+  voucherId String?   @unique
+  voucher   Voucher?  @relation(fields: [voucherId], references: [id])
+  qrisRef   String?
+  paidAt    DateTime?
+  createdAt DateTime  @default(now())
+}
+
+model FrameTemplate {
+  id          String           @id @default(uuid())
+  name        String           // "Strip Klasik 2x6", "Grid Pop 4x6"
+  layoutType  String           // STRIP_2X6, GRID_4X6, POLAROID
+  slotsCount  Int              @default(3) // 3 atau 4 shot pose
+  aspectRatio String           @default("2:3")
+  overlaySvg  String?
+  composites  PhotoComposite[]
+  isActive    Boolean          @default(true)
+}
+
+model PhotoShot {
+  id           String   @id @default(uuid())
+  sessionId    String
+  session      Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  poseIndex    Int      // 1, 2, 3, 4
+  filePath     String   // data URL atau path lokal
+  liveVideoUrl String?  // Data URL video live photo per pose (MP4/WebM)
+  capturedAt   DateTime @default(now())
+}
+
+model PhotoComposite {
+  id              String        @id @default(uuid())
+  sessionId       String        @unique
+  session         Session       @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  frameTemplateId String
+  frameTemplate   FrameTemplate @relation(fields: [frameTemplateId], references: [id])
+  filterSelected  String        @default("NORMAL")
+  frameColor      String        @default("#FFFFFF")
+  stickersData    String?       // JSON stringified koordinat stiker
+  finalImagePath  String        // Base64 data URL atau path file siap unduh
+  videoMontageUrl String?       // Data URL gabungan animasi live photo (MP4/WebM)
+  qrDownloadToken String        @unique @default(cuid())
+  createdAt       DateTime      @default(now())
+}
+
+model PrintJob {
+  id        String   @id @default(uuid())
+  sessionId String
+  session   Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  copies    Int      @default(1)
+  status    String   @default("QUEUED") // QUEUED, PRINTING, SUCCESS, FAILED
+  createdAt DateTime @default(now())
+}
