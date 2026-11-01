@@ -66,6 +66,7 @@ export function CameraCaptureScreen({
         streamRef.current = stream;
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
+          videoRef.current.play().catch(() => {});
         }
       } catch (err) {
         console.error("Camera access error:", err);
@@ -86,10 +87,24 @@ export function CameraCaptureScreen({
     };
   }, [cameraDeviceId, retryTrigger]);
 
+  // Keep camera stream attached to video element if it ever detaches
+  useEffect(() => {
+    if (videoRef.current && streamRef.current && videoRef.current.srcObject !== streamRef.current) {
+      videoRef.current.srcObject = streamRef.current;
+      videoRef.current.play().catch(() => {});
+    }
+  }, [reviewingPhoto]);
+
   // Capture frame to base64
   const captureFrame = (): string => {
     if (!videoRef.current) return "";
     const video = videoRef.current;
+
+    // Ensure stream is attached before capturing
+    if (streamRef.current && video.srcObject !== streamRef.current) {
+      video.srcObject = streamRef.current;
+    }
+
     const canvas = document.createElement("canvas");
     canvas.width = video.videoWidth || 1280;
     canvas.height = video.videoHeight || 720;
@@ -253,88 +268,86 @@ export function CameraCaptureScreen({
       </div>
 
       {/* Main Center Stage: Live Webcam Feed OR Frozen Review */}
-      {reviewingPhoto !== null ? (
-        <div className="relative flex flex-1 w-full max-w-5xl items-center justify-center my-2 rounded-2xl overflow-hidden bg-zinc-950 border border-zinc-300 shadow-sm">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
+      <div className="relative flex flex-1 w-full max-w-5xl items-center justify-center my-2 rounded-2xl overflow-hidden bg-zinc-950 border border-zinc-300 shadow-sm">
+        {cameraError ? (
+          <div className="flex flex-col items-center gap-3 p-6 text-center text-red-300">
+            <AlertTriangle className="h-10 w-10 text-red-400" />
+            <p className="max-w-md font-medium text-white text-sm">{cameraError}</p>
+            <button
+              type="button"
+              onClick={() => {
+                sounds.playClick();
+                setRetryTrigger((prev) => prev + 1);
+              }}
+              className="mt-2 flex min-h-[44px] items-center gap-2 rounded-xl bg-white px-5 py-2 text-xs font-semibold text-zinc-900 shadow-sm tap-bounce hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 cursor-pointer"
+            >
+              <RotateCcw className="h-4 w-4 text-zinc-900" />
+              <span>Coba Hubungkan Ulang Kamera</span>
+            </button>
+          </div>
+        ) : (
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            className={`h-full w-full object-cover ${reviewingPhoto !== null ? "hidden" : "block"}`}
+            style={{ transform: "scaleX(-1)" }}
+          />
+        )}
+
+        {/* Frozen Review Preview Overlay */}
+        {reviewingPhoto !== null && (
+          /* eslint-disable-next-line @next/next/no-img-element */
           <img
             src={reviewingPhoto}
             alt={`Review Pose ${capturedPhotos.length}`}
-            className="h-full w-full object-cover"
+            className="absolute inset-0 h-full w-full object-cover z-10"
           />
-        </div>
-      ) : (
-        /* LIVE VIEWPORT CONTAINER */
-        <div className="relative flex flex-1 w-full max-w-5xl items-center justify-center my-2 rounded-2xl overflow-hidden bg-zinc-950 border border-zinc-300 shadow-sm">
-          {cameraError ? (
-            <div className="flex flex-col items-center gap-3 p-6 text-center text-red-300">
-              <AlertTriangle className="h-10 w-10 text-red-400" />
-              <p className="max-w-md font-medium text-white text-sm">{cameraError}</p>
-              <button
-                type="button"
-                onClick={() => {
-                  sounds.playClick();
-                  setRetryTrigger((prev) => prev + 1);
-                }}
-                className="mt-2 flex min-h-[44px] items-center gap-2 rounded-xl bg-white px-5 py-2 text-xs font-semibold text-zinc-900 shadow-sm tap-bounce hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 cursor-pointer"
-              >
-                <RotateCcw className="h-4 w-4 text-zinc-900" />
-                <span>Coba Hubungkan Ulang Kamera</span>
-              </button>
-            </div>
-          ) : (
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              muted
-              className="h-full w-full object-cover"
-              style={{ transform: "scaleX(-1)" }}
-            />
-          )}
+        )}
 
-          {/* Flash Shutter Overlay */}
-          {isFlashing && (
-            <div className="absolute inset-0 bg-white transition-opacity duration-100 z-30 pointer-events-none" />
-          )}
+        {/* Flash Shutter Overlay */}
+        {isFlashing && (
+          <div className="absolute inset-0 bg-white transition-opacity duration-100 z-30 pointer-events-none" />
+        )}
 
-          {/* Dynamic Studio Countdown Ring */}
-          {countdown !== null && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 z-20 backdrop-blur-xs">
-              <div className="relative flex h-32 w-32 items-center justify-center rounded-full border-4 border-white/80 bg-black/60 shadow-xl">
-                <span className="font-mono text-6xl font-bold text-white">
-                  {countdown}
-                </span>
-              </div>
-              <span className="mt-4 text-xs font-semibold tracking-wider text-white uppercase drop-shadow-sm">
-                Tatap Kamera & Bersiap!
+        {/* Dynamic Studio Countdown Ring */}
+        {countdown !== null && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 z-20 backdrop-blur-xs">
+            <div className="relative flex h-32 w-32 items-center justify-center rounded-full border-4 border-white/80 bg-black/60 shadow-xl">
+              <span className="font-mono text-6xl font-bold text-white">
+                {countdown}
               </span>
             </div>
-          )}
+            <span className="mt-4 text-xs font-semibold tracking-wider text-white uppercase drop-shadow-sm">
+              Tatap Kamera & Bersiap!
+            </span>
+          </div>
+        )}
 
-          {/* Bottom Live Thumbnails Shelf */}
-          {capturedPhotos.length > 0 && (
-            <div className="absolute bottom-4 left-4 z-20 flex gap-2 overflow-x-auto max-w-[70%] p-1.5 rounded-xl bg-black/50 backdrop-blur-md border border-white/20">
-              {capturedPhotos.map((shot, idx) => (
-                <div
-                  key={idx}
-                  className="relative h-14 w-20 overflow-hidden rounded-lg border border-white/80 shadow-xs bg-zinc-800 shrink-0"
-                  aria-label={`Pose ${idx + 1}`}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={shot}
-                    alt={`Pose ${idx + 1}`}
-                    className="h-full w-full object-cover"
-                  />
-                  <span className="absolute bottom-0.5 right-1 text-[8px] font-mono font-bold text-white bg-black/80 px-1 rounded">
-                    #{idx + 1}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+        {/* Bottom Live Thumbnails Shelf */}
+        {capturedPhotos.length > 0 && reviewingPhoto === null && (
+          <div className="absolute bottom-4 left-4 z-20 flex gap-2 overflow-x-auto max-w-[70%] p-1.5 rounded-xl bg-black/50 backdrop-blur-md border border-white/20">
+            {capturedPhotos.map((shot, idx) => (
+              <div
+                key={idx}
+                className="relative h-14 w-20 overflow-hidden rounded-lg border border-white/80 shadow-xs bg-zinc-800 shrink-0"
+                aria-label={`Pose ${idx + 1}`}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={shot}
+                  alt={`Pose ${idx + 1}`}
+                  className="h-full w-full object-cover"
+                />
+                <span className="absolute bottom-0.5 right-1 text-[8px] font-mono font-bold text-white bg-black/80 px-1 rounded">
+                  #{idx + 1}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* BOTTOM TOUCH CONTROL BAR */}
       <div className="z-10 flex w-full max-w-2xl items-center justify-center gap-4 pt-1">

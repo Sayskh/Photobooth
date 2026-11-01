@@ -275,6 +275,8 @@ export default function PhotoboothKiosk() {
 
   // 5. From Customizer -> Back to Camera for Retake
   const handleRetakePhotos = () => {
+    setRawPhotos([]);
+    setLiveVideos([]);
     setCurrentStep("CAPTURE");
   };
 
