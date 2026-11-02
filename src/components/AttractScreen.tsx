@@ -62,11 +62,6 @@ export function AttractScreen({ onStart, onOpenAdmin }: AttractScreenProps) {
             </span>
           )}
         </button>
-
-        <div className="inline-flex items-center gap-2 rounded-xl bg-white px-3 py-1.5 text-xs font-semibold text-zinc-700 border border-zinc-200/80 shadow-xs">
-          <span className="h-2 w-2 rounded-full bg-emerald-500" />
-          <span>Siap Digunakan</span>
-        </div>
       </div>
 
       {/* Main Center Content Stage */}
