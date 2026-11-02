@@ -72,10 +72,33 @@ export async function POST(
       );
     }
 
+    // Pastikan frameTemplateId valid di database agar foreign key tidak melanggar constraint
+    let validTemplateId = frameTemplateId;
+    const existingTemplate = await prisma.frameTemplate.findUnique({
+      where: { id: validTemplateId },
+    });
+
+    if (!existingTemplate) {
+      // Buat template fallback on-the-fly jika belum ada di database
+      const fallback = await prisma.frameTemplate.upsert({
+        where: { id: validTemplateId },
+        update: {},
+        create: {
+          id: validTemplateId,
+          name: validTemplateId === "template-strip-4" ? "4 Pose Foto" : "3 Pose Foto",
+          layoutType: validTemplateId === "template-strip-4" ? "STRIP_2X6_4" : "STRIP_2X6_3",
+          slotsCount: validTemplateId === "template-strip-4" ? 4 : 3,
+          aspectRatio: "2:3",
+          isActive: true,
+        },
+      });
+      validTemplateId = fallback.id;
+    }
+
     const composite = await prisma.photoComposite.upsert({
       where: { sessionId },
       update: {
-        frameTemplateId,
+        frameTemplateId: validTemplateId,
         filterSelected: filterSelected || "NORMAL",
         frameColor: frameColor || "#FFFFFF",
         stickersData: stickersData ? JSON.stringify(stickersData) : null,
@@ -84,7 +107,7 @@ export async function POST(
       },
       create: {
         sessionId,
-        frameTemplateId,
+        frameTemplateId: validTemplateId,
         filterSelected: filterSelected || "NORMAL",
         frameColor: frameColor || "#FFFFFF",
         stickersData: stickersData ? JSON.stringify(stickersData) : null,
