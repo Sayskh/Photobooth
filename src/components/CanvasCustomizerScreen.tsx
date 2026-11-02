@@ -511,10 +511,10 @@ export function CanvasCustomizerScreen({
 
           <div>
             <span className="text-[10px] font-mono font-bold tracking-widest text-zinc-500 uppercase block">
-              Langkah 2 dari 3 • Touch-Up Akhir
+              Langkah 2 • Hias Foto
             </span>
             <h2 className="text-base font-bold text-zinc-900">
-              Poles Filter Warna dan Dekorasi Stiker
+              Poles & Hias Foto
             </h2>
           </div>
         </div>
@@ -539,7 +539,7 @@ export function CanvasCustomizerScreen({
           {/* Header Bar */}
           <div className="w-full flex-shrink-0 flex items-center justify-between text-xs font-mono text-zinc-600 mb-2 px-1">
             <span className="font-bold text-zinc-800 uppercase">
-              Pratinjau Lembar Cetak 4R (2 Strip Kembar)
+              Lembar Foto
             </span>
             <span className="text-[11px] font-semibold text-zinc-600 bg-zinc-100 px-2 py-0.5 rounded-md border border-zinc-200">
               {selectedStickerId ? "Geser stiker langsung pada foto" : "Ketuk stiker untuk mengatur"}
@@ -1068,11 +1068,11 @@ export function CanvasCustomizerScreen({
               className="flex min-h-[54px] w-full items-center justify-center gap-2 rounded-xl bg-[#1d1d1f] text-sm font-semibold text-white shadow-xs tap-bounce disabled:opacity-50 hover:bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 cursor-pointer"
             >
               <CheckCircle2 className="h-5 w-5" />
-              <span>Selesai & Lanjut Cetak Otomatis</span>
+              <span>Selesai & Cetak Foto</span>
               <ChevronRight className="h-4 w-4" />
             </button>
             <span className="text-center text-[10px] text-zinc-500 block mt-1 font-normal">
-              Foto akan langsung dicetak otomatis tanpa perlu tekan tombol manual
+              Foto Anda akan segera diproses untuk dicetak
             </span>
           </div>
         </div>

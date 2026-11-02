@@ -110,7 +110,7 @@ export function PrintOutputScreen({
                 Foto Selesai dan Sedang Dicetak!
               </h2>
               <p className="text-xs text-zinc-500 font-normal">
-                Cetak fisik otomatis diproses printer. Pindai QR code untuk softfile digital & video.
+                Foto Anda sedang dicetak. Pindai QR code untuk mengunduh softfile.
               </p>
             </div>
           </div>
@@ -147,7 +147,7 @@ export function PrintOutputScreen({
               <div className="flex items-center gap-2 mb-3">
                 <Printer className="h-5 w-5 text-zinc-900" />
                 <span className="text-sm font-bold text-zinc-900">
-                  Status Cetak Fisik
+                  Status Cetak
                 </span>
               </div>
 
@@ -156,10 +156,10 @@ export function PrintOutputScreen({
                   <Loader2 className="h-5 w-5 animate-spin text-zinc-700 shrink-0" />
                   <div>
                     <p className="text-xs font-bold text-zinc-900">
-                      Sedang Mencetak 2 Strip Foto...
+                      Sedang Mencetak Foto...
                     </p>
                     <p className="text-[11px] text-zinc-500 mt-0.5 font-normal">
-                      Perintah cetak telah dikirim otomatis ke printer kios.
+                      Foto Anda sedang diproses oleh printer.
                     </p>
                   </div>
                 </div>
@@ -168,17 +168,17 @@ export function PrintOutputScreen({
                   <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
                   <div>
                     <p className="text-xs font-bold text-emerald-900">
-                      2 Strip Foto Berhasil Diproses!
+                      Foto Berhasil Dicetak!
                     </p>
                     <p className="text-[11px] text-emerald-700 mt-0.5 font-normal">
-                      Silakan ambil strip foto fisik Anda di baki printer.
+                      Silakan ambil hasil foto Anda di baki printer.
                     </p>
                   </div>
                 </div>
               )}
 
-              <div className="mt-3 text-[11px] text-zinc-600 leading-relaxed font-normal">
-                Kios otomatis mencetak <strong>2 strip foto fisik</strong> studio berkualitas tinggi tanpa perlu menekan tombol tambahan.
+              <div className="mt-3 text-[11px] text-zinc-500 leading-relaxed font-normal">
+                Hasil foto studio Anda dicetak otomatis berkualitas tinggi.
               </div>
             </div>
 
@@ -186,7 +186,7 @@ export function PrintOutputScreen({
             <div className="flex flex-col items-center rounded-xl bg-zinc-50 p-4 md:p-5 border border-zinc-200 text-center">
               <div className="flex items-center gap-1.5 text-xs font-bold text-zinc-900 mb-2">
                 <QrCode className="h-4 w-4 text-zinc-700" />
-                <span>Unduh Softfile ke Smartphone</span>
+                <span>Unduh Softfile</span>
               </div>
 
               {qrCodeDataUrl ? (
@@ -205,7 +205,7 @@ export function PrintOutputScreen({
               )}
 
               <p className="text-[11px] text-zinc-500 max-w-xs leading-relaxed font-normal">
-                Pindai dengan kamera HP untuk mengunduh strip foto, lembar 4R, dan Live Photo video montage.
+                Pindai QR code dengan kamera ponsel untuk mengunduh foto Anda.
               </p>
             </div>
           </div>

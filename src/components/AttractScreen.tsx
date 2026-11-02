@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Camera, Smartphone, Printer, RefreshCw, ChevronRight } from "lucide-react";
+import { Camera, ChevronRight } from "lucide-react";
 import { sounds } from "@/lib/sound";
 
 interface AttractScreenProps {
@@ -65,7 +65,7 @@ export function AttractScreen({ onStart, onOpenAdmin }: AttractScreenProps) {
 
         <div className="inline-flex items-center gap-2 rounded-xl bg-white px-3 py-1.5 text-xs font-semibold text-zinc-700 border border-zinc-200/80 shadow-xs">
           <span className="h-2 w-2 rounded-full bg-emerald-500" />
-          <span>Self-Service Photobooth Kiosk</span>
+          <span>Siap Digunakan</span>
         </div>
       </div>
 
@@ -80,7 +80,7 @@ export function AttractScreen({ onStart, onOpenAdmin }: AttractScreenProps) {
         </h1>
 
         <p className="mt-3 md:mt-4 text-xs sm:text-sm text-zinc-600 max-w-md leading-relaxed font-normal">
-          Pilih tata letak frame, tangkap pose terbaik di depan kamera studio, lalu ambil 2 strip cetak fisik dan unduh softfile langsung ke ponsel.
+          Sentuh layar untuk memulai sesi foto Anda.
         </p>
 
         {/* Apple-style Tactile Action Button */}
@@ -99,33 +99,6 @@ export function AttractScreen({ onStart, onOpenAdmin }: AttractScreenProps) {
             <ChevronRight className="h-4 w-4 text-white" />
           </div>
         </button>
-      </div>
-
-      {/* Feature Cards in Clean Studio Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-2xl text-center mt-4 z-10">
-        <div className="flex flex-col items-center rounded-2xl bg-white p-4 border border-zinc-200/80 shadow-xs">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-zinc-100 text-zinc-800 mb-2">
-            <Printer className="h-4.5 w-4.5" />
-          </div>
-          <span className="text-xs font-bold text-zinc-900">2 Strip Cetak Fisik</span>
-          <span className="text-[11px] text-zinc-600 mt-0.5">Format 4R twin strip instan</span>
-        </div>
-
-        <div className="flex flex-col items-center rounded-2xl bg-white p-4 border border-zinc-200/80 shadow-xs">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-zinc-100 text-zinc-800 mb-2">
-            <RefreshCw className="h-4.5 w-4.5" />
-          </div>
-          <span className="text-xs font-bold text-zinc-900">Bebas Foto Ulang</span>
-          <span className="text-[11px] text-zinc-600 mt-0.5">Ulang pose bila belum pas</span>
-        </div>
-
-        <div className="flex flex-col items-center rounded-2xl bg-white p-4 border border-zinc-200/80 shadow-xs">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-zinc-100 text-zinc-800 mb-2">
-            <Smartphone className="h-4.5 w-4.5" />
-          </div>
-          <span className="text-xs font-bold text-zinc-900">Live Photo & Video</span>
-          <span className="text-[11px] text-zinc-600 mt-0.5">Scan QR ke galeri ponsel</span>
-        </div>
       </div>
     </div>
   );
