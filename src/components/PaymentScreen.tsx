@@ -126,12 +126,8 @@ export function PaymentScreen({
           <h2 className="text-lg md:text-2xl font-bold tracking-tight text-zinc-900 mt-0.5">
             Pembayaran Sesi Foto
           </h2>
-          <div className="mt-1 flex items-center justify-center gap-2 text-xs text-zinc-600 font-medium">
+          <div className="mt-1 flex items-center justify-center text-xs text-zinc-600 font-medium">
             <span>Tarif: <strong className="text-zinc-900 font-bold">Rp {price.toLocaleString("id-ID")}</strong></span>
-            <span>•</span>
-            <span className="font-semibold text-zinc-700 bg-zinc-200/60 px-2.5 py-0.5 rounded-md">
-              Termasuk {includedPrints} Lembar Strip
-            </span>
           </div>
         </div>
 

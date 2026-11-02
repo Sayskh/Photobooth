@@ -62,29 +62,29 @@ export const SOLID_PALETTE = [
 export const TEMPLATES: TemplateChoice[] = [
   {
     id: "template-strip-3",
-    name: "2×6\" 3 Photo (Twin Strip)",
-    shortName: "2×6\" 3 Photo",
+    name: "3 Pose Foto",
+    shortName: "3 Pose",
     category: "STRIP",
     layoutType: "STRIP_2X6_3",
     slotsCount: 3,
     posesPerStrip: 3,
     printCopies: 2,
-    badge: "2×6\" 3 Photo • Favorit",
-    headline: "3 Pose Vertikal (2 Strip Kembar 2×6\")",
-    subHeadline: "Format strip klasik 3 foto bertingkat, dicetak 2 lembar kembar pada kertas 4R",
+    badge: "3 Pose • Favorit",
+    headline: "3 Pose Foto",
+    subHeadline: "Ambil 3 pose foto seru",
   },
   {
     id: "template-strip-4",
-    name: "2×6\" 4 Photo (Life4Cuts)",
-    shortName: "2×6\" 4 Photo",
+    name: "4 Pose Foto",
+    shortName: "4 Pose",
     category: "STRIP",
     layoutType: "STRIP_2X6_4",
     slotsCount: 4,
     posesPerStrip: 4,
     printCopies: 2,
-    badge: "2×6\" 4 Photo • Korean 4-Cuts",
-    headline: "4 Pose Vertikal (2 Strip Kembar 2×6\")",
-    subHeadline: "Format strip populer Korea dengan 4 foto bertingkat sinematik",
+    badge: "4 Pose • Korean 4-Cuts",
+    headline: "4 Pose Foto",
+    subHeadline: "Ambil 4 pose foto seru",
   },
 ];
 
@@ -222,18 +222,14 @@ export function FrameSelectScreen({
 
         <div className="text-center">
           <span className="text-[10px] font-mono font-bold tracking-widest text-zinc-600 uppercase block">
-            Langkah 1 dari 3 • Konfigurasi Format
+            Langkah 1 • Pilih Desain
           </span>
           <h2 className="text-base md:text-lg font-bold tracking-tight text-zinc-900 mt-0.5">
-            Pilih Desain Template & Frame Vertikal
+            Pilih Desain Frame
           </h2>
         </div>
 
-        <div className="w-32 text-right">
-          <span className="rounded-lg bg-zinc-200/70 px-2.5 py-1 text-[11px] font-semibold text-zinc-700 border border-zinc-200">
-            Format: 4R Twin Strip
-          </span>
-        </div>
+        <div className="w-24" />
       </div>
 
       {/* Main Touch Interaction Stage */}
@@ -244,7 +240,7 @@ export function FrameSelectScreen({
             <span className="font-bold uppercase tracking-wider text-zinc-800 truncate max-w-[200px]">
               {currentTemplate.shortName}
             </span>
-            <span className="font-semibold text-zinc-600">{currentTemplate.slotsCount} Total Pose</span>
+            <span className="font-semibold text-zinc-600">{currentTemplate.slotsCount} Pose</span>
           </div>
 
           {/* PHYSICAL SHEET MOCKUP CONTAINER (2:3 PORTRAIT 4R) */}
@@ -267,7 +263,6 @@ export function FrameSelectScreen({
                       STRIP 1
                     </span>
                     <span className="text-[8px] font-bold block leading-tight">REBOOTH</span>
-                    <span className="text-[5px] font-mono opacity-60 block">300 DPI</span>
                   </div>
                 </div>
 
@@ -286,7 +281,6 @@ export function FrameSelectScreen({
                       STRIP 2
                     </span>
                     <span className="text-[8px] font-bold block leading-tight">REBOOTH</span>
-                    <span className="text-[5px] font-mono opacity-60 block">300 DPI</span>
                   </div>
                 </div>
               </div>
@@ -347,7 +341,7 @@ export function FrameSelectScreen({
           <div>
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-bold uppercase tracking-wider text-zinc-800">
-                1. Pilih Format Template Desain
+                1. Jumlah Pose
               </span>
             </div>
 
@@ -376,7 +370,7 @@ export function FrameSelectScreen({
                         {isSelected && <Check className="h-3.5 w-3.5 text-zinc-900 shrink-0" />}
                       </div>
                       <span className="text-[11px] font-medium text-zinc-600 block mt-0.5">
-                        {tmpl.slotsCount} Pose • {tmpl.printCopies} Lembar
+                        {tmpl.slotsCount} Pose Foto
                       </span>
                     </div>
                   </button>
@@ -389,7 +383,7 @@ export function FrameSelectScreen({
           <div>
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-bold uppercase tracking-wider text-zinc-800">
-                2. Pilih Desain & Warna Frame
+                2. Desain & Warna Frame
               </span>
 
               {/* Toggle: Koleksi Desain vs Warna Solid */}

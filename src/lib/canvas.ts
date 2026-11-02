@@ -135,6 +135,17 @@ export async function renderCompositeCanvas(
       "STRIP 2 • 3-CUTS",
       3
     );
+
+    // Subtle dashed center cut line guide between twin strips
+    ctx.save();
+    ctx.strokeStyle = "rgba(0, 0, 0, 0.12)";
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([8, 8]);
+    ctx.beginPath();
+    ctx.moveTo(stripWidth, 24);
+    ctx.lineTo(stripWidth, stripHeight - 24);
+    ctx.stroke();
+    ctx.restore();
   }
 
   // ====================================================
@@ -181,6 +192,17 @@ export async function renderCompositeCanvas(
       "STRIP 2 • 4-CUTS",
       4
     );
+
+    // Subtle dashed center cut line guide between twin strips
+    ctx.save();
+    ctx.strokeStyle = "rgba(0, 0, 0, 0.12)";
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([8, 8]);
+    ctx.beginPath();
+    ctx.moveTo(stripWidth, 24);
+    ctx.lineTo(stripWidth, stripHeight - 24);
+    ctx.stroke();
+    ctx.restore();
   }
 
   // Draw Custom User Stickers on Top
@@ -231,9 +253,9 @@ function renderVerticalStrip(
   const slotWidth = width - marginX * 2; // 510 px
 
   if (photosCount === 3) {
-    const slotHeight = 382;
-    const startY = 50;
-    const gapY = 24;
+    const slotHeight = 445;
+    const startY = 40;
+    const gapY = 22;
 
     for (let i = 0; i < Math.min(3, photos.length); i++) {
       const y = startY + i * (slotHeight + gapY);
@@ -241,7 +263,7 @@ function renderVerticalStrip(
     }
 
     const footerY = startY + 3 * (slotHeight + gapY) + 20;
-    const footerHeight = height - footerY - 40;
+    const footerHeight = height - footerY - 30;
     renderStripBrandingFooter(
       ctx,
       originX + marginX,
@@ -255,9 +277,9 @@ function renderVerticalStrip(
     );
   } else {
     // 4 photos
-    const slotHeight = 300;
-    const startY = 40;
-    const gapY = 18;
+    const slotHeight = 340;
+    const startY = 35;
+    const gapY = 16;
 
     for (let i = 0; i < Math.min(4, photos.length); i++) {
       const y = startY + i * (slotHeight + gapY);
@@ -265,7 +287,7 @@ function renderVerticalStrip(
     }
 
     const footerY = startY + 4 * (slotHeight + gapY) + 20;
-    const footerHeight = height - footerY - 40;
+    const footerHeight = height - footerY - 30;
     renderStripBrandingFooter(
       ctx,
       originX + marginX,
@@ -305,133 +327,134 @@ function renderStripBrandingFooter(
 
   if (themeStyle === "THEATER_TICKET") {
     const maroon = "#881337";
+    const boxMargin = 4;
+    const boxHeight = h - boxMargin * 2;
     ctx.strokeStyle = maroon;
     ctx.lineWidth = 2;
-    ctx.strokeRect(x, y + 10, w, h - 20);
+    ctx.strokeRect(x, y + boxMargin, w, boxHeight);
 
     ctx.fillStyle = maroon;
     ctx.textAlign = "center";
-    ctx.font = "900 24px serif";
-    ctx.fillText("ADMIT ONE", centerX, y + 55);
+    ctx.font = "900 22px serif";
+    ctx.fillText("ADMIT ONE", centerX, y + boxMargin + 32);
 
-    ctx.font = "italic 14px serif";
-    ctx.fillText("CINEMA PASS", centerX, y + 80);
+    ctx.font = "italic 13px serif";
+    ctx.fillText("CINEMA PASS", centerX, y + boxMargin + 52);
 
-    ctx.font = "bold 13px monospace";
-    ctx.fillText(stripLabel, centerX, y + 120);
+    ctx.font = "bold 12px monospace";
+    ctx.fillText(stripLabel, centerX, y + boxMargin + 80);
 
     const dateStr = new Date().toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
       year: "numeric",
     }).toUpperCase();
-    ctx.font = "12px monospace";
-    ctx.fillText(dateStr, centerX, y + 148);
-    ctx.fillText("SEAT A-04 • ROW 1", centerX, y + 170);
+    ctx.font = "11px monospace";
+    ctx.fillText(dateStr, centerX, y + boxMargin + 102);
+    ctx.fillText("SEAT A-04 • ROW 1", centerX, y + boxMargin + 120);
 
-    drawBarcode(ctx, x + 35, y + 205, w - 70, 55, maroon);
+    drawBarcode(ctx, x + 35, y + boxMargin + 140, w - 70, 48, maroon);
 
     ctx.font = "10px monospace";
-    ctx.fillText(watermarkText, centerX, y + h - 30);
+    ctx.fillText(watermarkText, centerX, y + boxMargin + boxHeight - 16);
   } else if (themeStyle === "Y2K_CHECKER") {
     const blue = "#1E3A8A";
     ctx.fillStyle = blue;
     ctx.textAlign = "center";
 
-    ctx.font = "900 26px monospace";
-    ctx.fillText("RADICAL", centerX, y + 50);
+    ctx.font = "900 24px monospace";
+    ctx.fillText("RADICAL", centerX, y + 36);
 
-    ctx.font = "bold 15px monospace";
-    ctx.fillText("MOMENT", centerX, y + 78);
+    ctx.font = "bold 14px monospace";
+    ctx.fillText("MOMENT", centerX, y + 60);
 
     ctx.fillStyle = "#FBBF24";
-    ctx.fillRect(x + 20, y + 105, w - 40, 42);
+    ctx.fillRect(x + 20, y + 78, w - 40, 36);
     ctx.fillStyle = blue;
-    ctx.font = "bold 14px monospace";
-    ctx.fillText(stripLabel, centerX, y + 132);
+    ctx.font = "bold 13px monospace";
+    ctx.fillText(stripLabel, centerX, y + 102);
 
-    ctx.font = "12px monospace";
-    ctx.fillText("REBOOTH • 2026", centerX, y + 180);
-    ctx.fillText("AUTHENTIC STUDIO SHOT", centerX, y + 202);
+    ctx.font = "11px monospace";
+    ctx.fillText("REBOOTH • 2026", centerX, y + 136);
+    ctx.fillText("AUTHENTIC STUDIO SHOT", centerX, y + 154);
 
-    drawBarcode(ctx, x + 30, y + 230, w - 60, 58, blue);
+    drawBarcode(ctx, x + 30, y + 170, w - 60, 48, blue);
 
     ctx.font = "10px monospace";
-    ctx.fillText(watermarkText, centerX, y + h - 30);
+    ctx.fillText(watermarkText, centerX, y + h - 16);
   } else if (themeStyle === "GREEN_CAFE") {
     ctx.fillStyle = "#FCE7F3";
-    ctx.fillRect(x, y + 10, w, 60);
+    ctx.fillRect(x, y + 6, w, 44);
     ctx.strokeStyle = "#DB2777";
     ctx.lineWidth = 2;
-    ctx.strokeRect(x, y + 10, w, 60);
+    ctx.strokeRect(x, y + 6, w, 44);
 
     ctx.fillStyle = "#9D174D";
-    ctx.font = "bold 16px serif";
+    ctx.font = "bold 15px serif";
     ctx.textAlign = "center";
-    ctx.fillText("CAFE MEMORIES", centerX, y + 36);
-    ctx.font = "12px monospace";
-    ctx.fillText("GUEST CHECK", centerX, y + 55);
+    ctx.fillText("CAFE MEMORIES", centerX, y + 25);
+    ctx.font = "11px monospace";
+    ctx.fillText("GUEST CHECK", centerX, y + 40);
 
     ctx.fillStyle = "#FEF08A";
-    ctx.fillRect(x, y + 88, w, 75);
+    ctx.fillRect(x, y + 58, w, 56);
     ctx.fillStyle = "#854D0E";
-    ctx.font = "bold 14px sans-serif";
-    ctx.fillText("SPECIAL DAY", centerX, y + 118);
-    ctx.font = "12px monospace";
-    ctx.fillText(stripLabel, centerX, y + 138);
-    ctx.fillText(new Date().toLocaleDateString("id-ID"), centerX, y + 154);
+    ctx.font = "bold 13px sans-serif";
+    ctx.fillText("SPECIAL DAY", centerX, y + 80);
+    ctx.font = "11px monospace";
+    ctx.fillText(stripLabel, centerX, y + 98);
 
-    drawBarcode(ctx, x + 30, y + 185, w - 60, 55, "#FFFFFF");
+    drawBarcode(ctx, x + 30, y + 128, w - 60, 46, "#FFFFFF");
 
     ctx.fillStyle = "#FFFFFF";
-    ctx.font = "11px monospace";
-    ctx.fillText(watermarkText, centerX, y + h - 30);
+    ctx.font = "10px monospace";
+    ctx.fillText(watermarkText, centerX, y + h - 16);
   } else if (themeStyle === "POP_YELLOW") {
     ctx.fillStyle = "#18181B";
     ctx.textAlign = "center";
-    ctx.font = "900 26px sans-serif";
-    ctx.fillText("HAPPY DAY", centerX, y + 50);
+    ctx.font = "900 24px sans-serif";
+    ctx.fillText("HAPPY DAY", centerX, y + 36);
 
-    ctx.font = "bold 14px monospace";
-    ctx.fillText("★ PHOTO EVENT ★", centerX, y + 82);
+    ctx.font = "bold 13px monospace";
+    ctx.fillText("★ PHOTO EVENT ★", centerX, y + 60);
 
     ctx.fillStyle = "#18181B";
-    ctx.fillRect(x + 20, y + 110, w - 40, 48);
+    ctx.fillRect(x + 20, y + 78, w - 40, 36);
     ctx.fillStyle = "#FACC15";
-    ctx.font = "bold 15px monospace";
-    ctx.fillText(stripLabel, centerX, y + 140);
+    ctx.font = "bold 13px monospace";
+    ctx.fillText(stripLabel, centerX, y + 102);
 
-    drawBarcode(ctx, x + 30, y + 185, w - 60, 55, "#18181B");
+    drawBarcode(ctx, x + 30, y + 134, w - 60, 46, "#18181B");
 
     ctx.fillStyle = "#18181B";
-    ctx.font = "11px monospace";
-    ctx.fillText(watermarkText, centerX, y + h - 30);
+    ctx.font = "10px monospace";
+    ctx.fillText(watermarkText, centerX, y + h - 16);
   } else {
     // CLASSIC STUDIO MINIMAL
     ctx.fillStyle = textColor;
     ctx.textAlign = "center";
 
-    ctx.font = "bold 22px sans-serif";
-    ctx.fillText(watermarkText, centerX, y + 55);
+    ctx.font = "bold 20px sans-serif";
+    ctx.fillText(watermarkText, centerX, y + 38);
 
-    ctx.font = "13px monospace";
+    ctx.font = "12px monospace";
     ctx.globalAlpha = 0.7;
-    ctx.fillText(stripLabel, centerX, y + 88);
+    ctx.fillText(stripLabel, centerX, y + 64);
 
     const dateStr = new Date().toLocaleDateString("id-ID", {
       day: "numeric",
       month: "short",
       year: "numeric",
     });
-    ctx.fillText(dateStr, centerX, y + 115);
+    ctx.fillText(dateStr, centerX, y + 88);
 
-    ctx.fillRect(centerX - 50, y + 138, 100, 2);
+    ctx.fillRect(centerX - 45, y + 104, 90, 2);
 
-    ctx.font = "11px monospace";
-    ctx.fillText("AUTHENTIC FILM", centerX, y + 170);
-    ctx.fillText("300 DPI • STUDIO", centerX, y + 192);
+    ctx.font = "10px monospace";
+    ctx.fillText("AUTHENTIC FILM STUDIO", centerX, y + 126);
 
-    drawBarcode(ctx, x + 35, y + 215, w - 70, 58, textColor);
+    drawBarcode(ctx, x + 35, y + 144, w - 70, 48, textColor);
+    ctx.globalAlpha = 1;
   }
 
   ctx.restore();
