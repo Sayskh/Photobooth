@@ -15,6 +15,7 @@ import {
   Video,
 } from "lucide-react";
 import { exportStripsFromComposite } from "@/lib/canvas";
+import { ReboothLogo } from "@/components/ReboothLogo";
 
 interface DownloadPayload {
   compositeImage: string;
@@ -147,9 +148,8 @@ export default function DownloadPage() {
     >
       {/* Header */}
       <div className="flex flex-col items-center text-center mb-6 max-w-md w-full">
-        <div className="flex items-center gap-2 rounded-xl bg-white px-3.5 py-1.5 text-xs font-semibold text-zinc-700 border border-zinc-200 mb-3 shadow-xs">
-          <Camera className="h-3.5 w-3.5 text-zinc-800" />
-          <span>Rebooth Studio</span>
+        <div className="rounded-2xl bg-white px-3.5 py-1.5 border border-zinc-200 mb-3 shadow-xs">
+          <ReboothLogo size="sm" />
         </div>
         <h1 className="text-2xl font-bold tracking-tight text-zinc-900 md:text-3xl">
           Unduh Foto dan Video

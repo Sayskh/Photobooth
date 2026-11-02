@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { Camera, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { sounds } from "@/lib/sound";
+import { ReboothLogo } from "./ReboothLogo";
 
 interface AttractScreenProps {
   onStart: () => void;
@@ -47,17 +48,12 @@ export function AttractScreen({ onStart, onOpenAdmin }: AttractScreenProps) {
               handleLogoTap(e);
             }
           }}
-          className="flex items-center gap-2.5 rounded-xl bg-white px-3.5 py-2 border border-zinc-200/80 shadow-xs tap-bounce focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 cursor-pointer"
+          className="flex items-center gap-2.5 rounded-2xl bg-white px-3.5 py-2 border border-zinc-200/80 shadow-xs tap-bounce focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 cursor-pointer"
           aria-label="Rebooth logo"
         >
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#1d1d1f] text-white">
-            <Camera className="h-4 w-4" />
-          </div>
-          <span className="text-base font-bold tracking-tight text-zinc-900">
-            Rebooth
-          </span>
+          <ReboothLogo size="md" />
           {logoTapCount > 0 && (
-            <span className="text-xs text-zinc-500 font-mono">
+            <span className="text-xs text-zinc-500 font-mono ml-1">
               ({5 - logoTapCount})
             </span>
           )}
