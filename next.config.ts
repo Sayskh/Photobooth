@@ -5,6 +5,9 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
+  outputFileTracingIncludes: {
+    "/**": ["./prisma/template.db"],
+  },
   async headers() {
     return [
       {
